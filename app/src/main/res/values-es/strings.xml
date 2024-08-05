@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home">Home</string>
+    <string name="destinations">Destinos</string>
+    <string name="destination_detail">Detalles del destino</string>
+</resources>
