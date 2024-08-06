@@ -53,7 +53,6 @@ android {
 
 dependencies {
 
-    implementation(libs.androidx.room.ktx)
     //Testing dependencies
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,6 +83,9 @@ dependencies {
     implementation (libs.logging.interceptor)
     implementation(libs.androidx.paging.common.android)
     implementation(libs.androidx.room.common)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences)
 
     kapt (libs.dagger.compiler)
     kapt (libs.androidx.hilt.compiler)

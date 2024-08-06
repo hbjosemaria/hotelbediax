@@ -30,4 +30,9 @@ object RoomModule {
     fun provideDestinationDao(database: HotelBediaXDatabase) =
         database.destinationDao()
 
+    @Provides
+    @Singleton
+    fun provideDestinationRemoteKeyDao(database: HotelBediaXDatabase) =
+        database.destinationRemoteKeyDao()
+
 }

@@ -1,7 +1,7 @@
 package com.joheba.hotelbediax.data.service.external
 
-import androidx.paging.PagingSource
 import com.joheba.hotelbediax.data.model.external.DestinationDto
+import com.joheba.hotelbediax.data.model.external.DestinationListResponseDto
 import com.joheba.hotelbediax.data.repository.ExternalDestinationRepository
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -12,7 +12,7 @@ import retrofit2.http.Path
 
 interface ApiDestinationService: ExternalDestinationRepository {
     @GET(ApiUrl.DESTINATION)
-    override suspend fun getAll(): PagingSource<Int, DestinationDto>
+    override suspend fun getAll(page: Int): DestinationListResponseDto
 
     @DELETE("${ApiUrl.DESTINATION}{id}")
     override suspend fun deleteById(

@@ -1,5 +1,9 @@
 package com.joheba.hotelbediax.data.di
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.joheba.hotelbediax.data.repository.DataStoreRepository
+import com.joheba.hotelbediax.data.repository.DataStoreRepositoryImpl
 import com.joheba.hotelbediax.data.repository.ExternalDestinationRepository
 import com.joheba.hotelbediax.data.repository.ExternalDestinationRepositoryImpl
 import com.joheba.hotelbediax.data.repository.LocalDestinationRepository
@@ -29,4 +33,11 @@ object RepoModule {
         apiService: ApiDestinationService
     ) : ExternalDestinationRepository =
         ExternalDestinationRepositoryImpl(apiService)
+
+    @Provides
+    @Singleton
+    fun provideDataStoreRepository(
+        dataStore: DataStore<Preferences>
+    ) : DataStoreRepository =
+        DataStoreRepositoryImpl(dataStore)
 }
