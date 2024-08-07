@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -75,23 +76,29 @@ dependencies {
     //Added dependencies
     implementation (libs.androidx.hilt.work)
     implementation (libs.androidx.hilt.navigation.compose)
-    implementation (libs.androidx.hilt.lifecycle.viewmodel)
+//    implementation (libs.androidx.hilt.lifecycle.viewmodel)
     implementation (libs.hilt.android)
     implementation (libs.androidx.navigation.compose)
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
     implementation (libs.logging.interceptor)
-    implementation(libs.androidx.paging.common.android)
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.datastore.core.android)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.material.icons.extended.android)
+    implementation(libs.androidx.material3.adaptive.navigation.suite.android)
+    implementation(libs.androidx.appcompat)
+    implementation (libs.androidx.room.paging)
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose.android)
+    implementation (libs.androidx.work.runtime)
 
-    kapt (libs.dagger.compiler)
-    kapt (libs.androidx.hilt.compiler)
-    kapt (libs.hilt.android.compiler)
-}
+    kapt (libs.dagger.hilt.compiler)
 
-kapt {
-    correctErrorTypes = true
+
+//    annotationProcessor (libs.room.compiler)
+//    ksp(libs.androidx.room.compiler)
+//    ksp(libs.hilt.compiler)
+//    kapt (libs.hilt.android.compiler)
 }

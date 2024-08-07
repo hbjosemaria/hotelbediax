@@ -3,4 +3,14 @@
     <string name="home">Home</string>
     <string name="destinations">Destinations</string>
     <string name="destination_detail">Destination details</string>
+    <string name="empty_message" />
+    <string name="destination_created">Destination created</string>
+    <string name="destination_not_created">Destination could not be created</string>
+    <string name="destination_updated">Destination updated</string>
+    <string name="destination_not_updated">Destination could not be updated</string>
+    <string name="destination_deleted">Destination deleted</string>
+    <string name="destination_not_deleted">Destination could not be deleted</string>
+    <string name="home_message">Here we can display previews of the most accessed features</string>
+    <string name="destinations_error_message">Something went wrong when accesing to the destinations</string>
+    <string name="destination_detail_error_message">Something went wrong when accesing to the destination details</string>
 </resources>

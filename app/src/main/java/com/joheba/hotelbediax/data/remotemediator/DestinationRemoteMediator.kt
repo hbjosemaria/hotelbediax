@@ -8,20 +8,22 @@ import androidx.room.withTransaction
 import com.joheba.hotelbediax.data.di.DataStoreVariableName
 import com.joheba.hotelbediax.data.di.DataStoreVariableType
 import com.joheba.hotelbediax.data.model.external.DestinationDto
+import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.data.model.local.DestinationRemoteKeyEntity
 import com.joheba.hotelbediax.data.repository.DataStoreRepository
 import com.joheba.hotelbediax.data.repository.DestinationRemoteKeyRepository
 import com.joheba.hotelbediax.data.repository.ExternalDestinationRepository
 import com.joheba.hotelbediax.data.service.local.HotelBediaXDatabase
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @ExperimentalPagingApi
-class DestinationRemoteMediator(
+class DestinationRemoteMediator @Inject constructor(
     private val database: HotelBediaXDatabase,
     private val externalDestinationRepository: ExternalDestinationRepository,
     private val dataStoreRepository: DataStoreRepository,
     private val remoteKeyRepository: DestinationRemoteKeyRepository
-) : RemoteMediator<Int, DestinationDto>() {
+) : RemoteMediator<Int, DestinationEntity>() {
 
     override suspend fun initialize(): InitializeAction {
 
@@ -61,7 +63,7 @@ class DestinationRemoteMediator(
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DestinationDto>,
+        state: PagingState<Int, DestinationEntity>,
     ): MediatorResult {
         val destinationDao = database.destinationDao()
 

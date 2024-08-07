@@ -11,6 +11,10 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ApiDestinationService: ExternalDestinationRepository {
+
+    @GET(ApiUrl.DESTINATION)
+    override suspend fun getAll(): DestinationListResponseDto
+
     @GET(ApiUrl.DESTINATION)
     override suspend fun getAll(page: Int): DestinationListResponseDto
 
@@ -19,15 +23,28 @@ interface ApiDestinationService: ExternalDestinationRepository {
         @Path("id") id: Int
     ): Boolean
 
+    @DELETE
+    override suspend fun deleteBunchById(destinationIdList: List<Int>): Boolean
+
     @PUT("${ApiUrl.DESTINATION}{id}")
     override suspend fun update(
         @Path("id") id: Int,
         @Body destination: DestinationDto
     ): Boolean
 
+    @PUT(ApiUrl.DESTINATION)
+    override suspend fun updateBunch(
+        @Body destinationList: List<DestinationDto>
+    ): Boolean
+
     @POST(ApiUrl.DESTINATION)
     override suspend fun create(
         @Body destination: DestinationDto
+    ): Boolean
+
+    @POST(ApiUrl.DESTINATION)
+    override suspend fun createBunch(
+        @Body destinationList: List<DestinationDto>
     ): Boolean
 }
 

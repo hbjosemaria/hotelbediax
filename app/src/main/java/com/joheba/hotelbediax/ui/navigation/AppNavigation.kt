@@ -4,9 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.joheba.hotelbediax.ui.destinationdetails.DestinationDetailsScreen
+import com.joheba.hotelbediax.ui.main.destination.DestinationScreen
+import com.joheba.hotelbediax.ui.main.home.HomeScreen
 
 @Composable
 fun AppNavigation(
@@ -22,31 +28,63 @@ fun AppNavigation(
         composable(
             route = MainAppScreens.Home.route
         ) {
-            //TODO: implement MainScreen
-            // Send also selectedNavigationIndex for its navigationSuiteScaffold
+            HomeScreen(
+                selectedNavigationIndex = appNavigationState.selectedNavigationIndex,
+                navigateToItemRoute = { route: String ->
+                    navigateToBottomNavigationItem(
+                        navController = navHostController,
+                        route = route
+                    )
+                }
+            )
         }
 
         composable(
             route = MainAppScreens.Destinations.route
         ) {
-            //TODO: implement DestinationsScreen
-            // Send also selectedNavigationIndex for its navigationSuiteScaffold
+            DestinationScreen(
+                selectedNavigationIndex = appNavigationState.selectedNavigationIndex,
+                navigateToItemRoute = { route: String ->
+                    navigateToBottomNavigationItem(
+                        navController = navHostController,
+                        route = route
+                    )
+                }
+            )
         }
 
         composable(
             route = MainAppScreens.DestinationDetails.route
         ) {
-            val destination = navHostController.currentBackStackEntry?.arguments
+            val destinationId = navHostController.currentBackStackEntry?.arguments
                 ?.getInt(NavigationVariableNames.DESTINATION_ID.variableName)
 
-            //TODO: implement DestinationDetailsScreen
-            // Send also its destination
-            // Send also selectedNavigationIndex for its navigationSuiteScaffold
-
+            DestinationDetailsScreen(
+                navigateBack = {
+                    navHostController.popBackStack(
+                        route = MainAppScreens.Destinations.route,
+                        inclusive = false
+                    )
+                },
+                destinationId = destinationId
+            )
         }
     }
 }
 
 enum class NavigationVariableNames(val variableName: String) {
     DESTINATION_ID("destinationId")
+}
+
+private fun navigateToBottomNavigationItem(
+    navController: NavHostController,
+    route: String,
+) {
+    navController.navigate(route) {
+        popUpTo(navController.graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
 }

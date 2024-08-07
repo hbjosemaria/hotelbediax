@@ -8,6 +8,7 @@ import com.joheba.hotelbediax.data.di.DataStoreVariableType
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 interface DataStoreRepository {
     suspend fun <T> saveData(dataType: DataStoreVariableType, dataName: String, data: T)
@@ -15,7 +16,7 @@ interface DataStoreRepository {
 }
 
 @Suppress("UNCHECKED_CAST")
-class DataStoreRepositoryImpl(
+class DataStoreRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) : DataStoreRepository {
 
