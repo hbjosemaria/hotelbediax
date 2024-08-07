@@ -11,7 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-private const val PREFERENCES = "preferences"
+private const val PREFERENCES = "hotelbediax_cache_preferences"
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PREFERENCES)
 
 @Module

@@ -13,4 +13,5 @@
     <string name="home_message">Aquí podemos mostrar una previa de las características más usadas</string>
     <string name="destinations_error_message">Algo salió mal cuando accedíamos a los destinos</string>
     <string name="destination_detail_error_message">Algo salió mal cuando accedíamos a los detalles del destino</string>
+    <string name="destination_new">Nuevo destino</string>
 </resources>

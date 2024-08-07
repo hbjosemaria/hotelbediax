@@ -1,5 +1,6 @@
 package com.joheba.hotelbediax.data.repository
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -25,7 +26,6 @@ class DataStoreRepositoryImpl @Inject constructor(
             when (dataType) {
                 DataStoreVariableType.LongType -> {
                     preferences[longPreferencesKey(dataName)] = data as Long
-
                 }
             }
         }
@@ -33,14 +33,13 @@ class DataStoreRepositoryImpl @Inject constructor(
 
     override suspend fun <T> loadData(dataRequest: Pair<DataStoreVariableType, String>): T? {
         val (dataType, dataName) = dataRequest
-        return dataStore.data.filter { preferences ->
+        return dataStore.data.map { preferences ->
             when (dataType) {
                 DataStoreVariableType.LongType -> {
-                    preferences.contains(longPreferencesKey(dataName))
+                    preferences[longPreferencesKey(dataName)] as T?
                 }
             }
         }
-            .map { it as T }
             .first()
     }
 }

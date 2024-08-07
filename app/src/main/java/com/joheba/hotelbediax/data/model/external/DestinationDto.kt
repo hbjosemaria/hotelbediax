@@ -24,6 +24,4 @@ data class DestinationDto (
             type = type,
             lastModify = lastModify
         )
-
-
 }

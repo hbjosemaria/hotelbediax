@@ -7,8 +7,8 @@ import javax.inject.Inject
 
 interface LocalDestinationTempRepository {
     suspend fun getAll(): List<DestinationTempEntity>
-    suspend fun clearAll(): Int
-    suspend fun addEnqueuedRecord(destinationTemp: DestinationTempEntity): Int
+    suspend fun clearAll()
+    suspend fun addEnqueuedRecord(destinationTemp: DestinationTempEntity)
 }
 
 interface ExternalDestinationTempRepository {
@@ -26,10 +26,10 @@ class DestinationTempRepositoryImpl @Inject constructor(
     override suspend fun getAll(): List<DestinationTempEntity> =
         roomService.getAll()
 
-    override suspend fun clearAll(): Int =
+    override suspend fun clearAll() =
         roomService.clearAll()
 
-    override suspend fun addEnqueuedRecord(destinationTemp: DestinationTempEntity): Int =
+    override suspend fun addEnqueuedRecord(destinationTemp: DestinationTempEntity) =
         roomService.addEnqueuedRecord(destinationTemp)
 
     override suspend fun syncCreate(destinationList: List<DestinationDto>): Boolean =

@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.joheba.hotelbediax.ui.destinationdetails.DestinationDetailsScreen
 import com.joheba.hotelbediax.ui.main.destination.DestinationScreen
 import com.joheba.hotelbediax.ui.main.home.HomeScreen
+import com.joheba.hotelbediax.ui.newdestination.NewDestinationScreen
 
 @Composable
 fun AppNavigation(
@@ -35,6 +36,9 @@ fun AppNavigation(
                         navController = navHostController,
                         route = route
                     )
+                },
+                updateSelectedNavigationIndex = {newIndex: Int ->
+                    appNavigationViewModel.updateSelectedNavigationIndex(newIndex)
                 }
             )
         }
@@ -49,6 +53,9 @@ fun AppNavigation(
                         navController = navHostController,
                         route = route
                     )
+                },
+                updateSelectedNavigationIndex = {newIndex: Int ->
+                    appNavigationViewModel.updateSelectedNavigationIndex(newIndex)
                 }
             )
         }
@@ -67,6 +74,19 @@ fun AppNavigation(
                     )
                 },
                 destinationId = destinationId
+            )
+        }
+
+        composable(
+            route = MainAppScreens.NewDestination.route
+        ) {
+            NewDestinationScreen(
+                navigateBack = {
+                    navHostController.popBackStack(
+                        route = MainAppScreens.Destinations.route,
+                        inclusive = false
+                    )
+                }
             )
         }
     }

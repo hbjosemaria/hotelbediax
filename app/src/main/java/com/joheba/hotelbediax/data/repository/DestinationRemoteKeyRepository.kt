@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 interface DestinationRemoteKeyRepository {
     suspend fun getKey(destinationId: Int): DestinationRemoteKeyEntity?
-    suspend fun insertAll(remoteKeyList: List<DestinationRemoteKeyEntity>): Int
+    suspend fun insertAll(remoteKeyList: List<DestinationRemoteKeyEntity>)
     suspend fun clearKeys(): Int
 }
 
@@ -16,7 +16,7 @@ class DestinationRemoteKeyRepositoryImpl @Inject constructor(
     override suspend fun getKey(destinationId: Int): DestinationRemoteKeyEntity? =
         roomService.getKey(destinationId)
 
-    override suspend fun insertAll(remoteKeyList: List<DestinationRemoteKeyEntity>): Int =
+    override suspend fun insertAll(remoteKeyList: List<DestinationRemoteKeyEntity>) =
         roomService.insertAll(remoteKeyList)
 
     override suspend fun clearKeys(): Int =

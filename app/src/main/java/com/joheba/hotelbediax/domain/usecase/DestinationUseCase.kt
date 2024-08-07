@@ -52,17 +52,17 @@ class DestinationUseCase @Inject constructor(
                 }
             }
 
-    suspend fun getDestinationById(destinationId: Int): Destination? =
-        destinationRepository.getDestinationById(destinationId)?.toDomain()
+    suspend fun getDestinationById(destinationId: Int): Destination =
+        destinationRepository.getDestinationById(destinationId).toDomain()
 
     suspend fun createDestination(destination: Destination): Boolean {
-        val result = destinationRepository.create(destination.toEntity()) == 1
-        try {
+        return try {
+            destinationRepository.create(destination.toEntity())
             apiRepository.create(destination.toDto())
         } catch (e: Exception) {
             tempRepository.addEnqueuedRecord(destination.toTempEntity(DestinationTempEntity.DestinationTempEntityAction.CREATE))
+            false
         }
-        return result
     }
 
     suspend fun updateDestination(destination: Destination): Boolean {

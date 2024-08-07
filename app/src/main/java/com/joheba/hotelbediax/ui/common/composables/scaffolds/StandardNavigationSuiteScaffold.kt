@@ -1,5 +1,6 @@
 package com.joheba.hotelbediax.ui.common.composables.scaffolds
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
@@ -9,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.joheba.hotelbediax.R
@@ -18,6 +20,7 @@ import com.joheba.hotelbediax.ui.navigation.MainAppScreens
 fun StandardNavigationSuiteScaffold(
     selectedNavigationIndex: Int,
     navigateToItemRoute: (String) -> Unit,
+    updateSelectedNavigationIndex: (Int) -> Unit,
     content: @Composable () -> Unit
 ) {
     NavigationSuiteScaffold(
@@ -26,7 +29,10 @@ fun StandardNavigationSuiteScaffold(
                 item(
                     selected = index == selectedNavigationIndex,
                     onClick = {
-                        navigateToItemRoute(navigationItem.route)
+                        if (index != selectedNavigationIndex) {
+                            navigateToItemRoute(navigationItem.route)
+                            updateSelectedNavigationIndex(index)
+                        }
                     },
                     icon = {
                         Icon(

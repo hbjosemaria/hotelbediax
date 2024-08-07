@@ -20,27 +20,28 @@ object RoomModule {
 
     @Provides
     @Singleton
-    fun provideHotelBediaXDatabase(@ApplicationContext context: Context) : HotelBediaXDatabase =
-        Room.databaseBuilder(
-            context = context,
-            klass = HotelBediaXDatabase::class.java,
-            name = "HotelBediaX"
-        ).fallbackToDestructiveMigration()
+    fun provideHotelBediaXDatabase(@ApplicationContext context: Context): HotelBediaXDatabase =
+        Room
+            .databaseBuilder(
+                context = context,
+                klass = HotelBediaXDatabase::class.java,
+                name = "HotelBediaX"
+            ).fallbackToDestructiveMigration()
             .build()
 
     @Provides
     @Singleton
-    fun provideDestinationDao(database: HotelBediaXDatabase) : DestinationDao =
+    fun provideDestinationDao(database: HotelBediaXDatabase): DestinationDao =
         database.destinationDao()
 
     @Provides
     @Singleton
-    fun provideDestinationRemoteKeyDao(database: HotelBediaXDatabase) : DestinationRemoteKeyDao =
+    fun provideDestinationRemoteKeyDao(database: HotelBediaXDatabase): DestinationRemoteKeyDao =
         database.destinationRemoteKeyDao()
 
     @Provides
     @Singleton
-    fun provideDestinationTempDao(database: HotelBediaXDatabase) : LocalDestinationTempDao =
+    fun provideDestinationTempDao(database: HotelBediaXDatabase): LocalDestinationTempDao =
         database.destinationTempDao()
 
 }

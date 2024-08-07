@@ -9,6 +9,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiDestinationService: ExternalDestinationRepository {
 
@@ -16,14 +17,14 @@ interface ApiDestinationService: ExternalDestinationRepository {
     override suspend fun getAll(): DestinationListResponseDto
 
     @GET(ApiUrl.DESTINATION)
-    override suspend fun getAll(page: Int): DestinationListResponseDto
+    override suspend fun getAll(@Query("page") page: Int): DestinationListResponseDto
 
     @DELETE("${ApiUrl.DESTINATION}{id}")
     override suspend fun deleteById(
         @Path("id") id: Int
     ): Boolean
 
-    @DELETE
+    @DELETE(ApiUrl.DESTINATION)
     override suspend fun deleteBunchById(destinationIdList: List<Int>): Boolean
 
     @PUT("${ApiUrl.DESTINATION}{id}")
@@ -51,7 +52,7 @@ interface ApiDestinationService: ExternalDestinationRepository {
 enum class ApiUrl(val url: String) {
     BASE("https://api.hotelbediax.com/1/");
 
-    companion object ApiEndpoints {
-        const val DESTINATION = "destination/"
+    companion object {
+        const val DESTINATION = "destination"
     }
 }

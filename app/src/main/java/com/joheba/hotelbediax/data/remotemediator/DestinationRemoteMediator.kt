@@ -29,12 +29,15 @@ class DestinationRemoteMediator @Inject constructor(
 
         //Added cache timeout in case we need to invalidate the cached data for renewing it.
         // Feel free to adjust the cache timeout timer or set it to a specific daily time
-        val cacheTimeoutAmount = TimeUnit.HOURS.convert(6, TimeUnit.MILLISECONDS)
+        val cacheTimeoutAmount = TimeUnit.HOURS.toMillis(6)
         val currentTime = System.currentTimeMillis()
         val lastCacheTimeout = dataStoreRepository.loadData<Long>(Pair(
             DataStoreVariableType.LongType,
             DataStoreVariableName.CACHE_TIMEOUT.variableName
         ))
+
+        //Use this line if you want to force a cache invalidation
+//        val lastCacheTimeout : Long? = null
 
         return when {
             lastCacheTimeout == null -> {

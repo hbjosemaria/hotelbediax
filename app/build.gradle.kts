@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp")
+//    id("com.google.devtools.ksp")
 }
 
 android {
@@ -24,6 +24,9 @@ android {
     }
 
     buildTypes {
+        debug {
+
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -41,6 +44,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -76,7 +80,6 @@ dependencies {
     //Added dependencies
     implementation (libs.androidx.hilt.work)
     implementation (libs.androidx.hilt.navigation.compose)
-//    implementation (libs.androidx.hilt.lifecycle.viewmodel)
     implementation (libs.hilt.android)
     implementation (libs.androidx.navigation.compose)
     implementation (libs.retrofit)
@@ -89,16 +92,11 @@ dependencies {
     implementation(libs.androidx.material.icons.extended.android)
     implementation(libs.androidx.material3.adaptive.navigation.suite.android)
     implementation(libs.androidx.appcompat)
-    implementation (libs.androidx.room.paging)
+    implementation(libs.androidx.room.paging)
     implementation(libs.androidx.paging.runtime.ktx)
     implementation(libs.androidx.paging.compose.android)
-    implementation (libs.androidx.work.runtime)
+    implementation(libs.androidx.work.runtime)
 
-    kapt (libs.dagger.hilt.compiler)
-
-
-//    annotationProcessor (libs.room.compiler)
-//    ksp(libs.androidx.room.compiler)
-//    ksp(libs.hilt.compiler)
-//    kapt (libs.hilt.android.compiler)
+    kapt(libs.androidx.room.compiler)
+    kapt(libs.dagger.hilt.compiler)
 }

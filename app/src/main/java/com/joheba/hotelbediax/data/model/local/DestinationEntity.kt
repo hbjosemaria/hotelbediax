@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 @Entity(tableName = "destination")
 data class DestinationEntity (
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     val id: Int,
     val name: String,
     val description: String,

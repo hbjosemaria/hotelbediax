@@ -12,13 +12,13 @@ import javax.inject.Inject
 //Both interfaces can be modified to manage also Language selection if needed
 interface LocalDestinationRepository {
     fun getAll() : PagingSource<Int, DestinationEntity>
-    suspend fun getDestinationById(destinationId: Int): DestinationEntity?
+    suspend fun getDestinationById(destinationId: Int): DestinationEntity
     suspend fun deleteById(id: Int): Int
     suspend fun update(destination: DestinationEntity): Int
-    suspend fun create(destination: DestinationEntity): Int
-    suspend fun insertAll(destinationList: List<DestinationEntity>): Int
+    suspend fun create(destination: DestinationEntity)
+    suspend fun insertAll(destinationList: List<DestinationEntity>)
     suspend fun clearDestinations(): Int
-    suspend fun getLastId(): Int?
+    suspend fun getLastId(): Int
 }
 
 interface ExternalDestinationRepository {
@@ -38,7 +38,7 @@ class LocalDestinationRepositoryImpl @Inject constructor(
     override fun getAll(): PagingSource<Int, DestinationEntity> =
         roomService.getAll()
 
-    override suspend fun getDestinationById(destinationId: Int): DestinationEntity? =
+    override suspend fun getDestinationById(destinationId: Int): DestinationEntity =
         roomService.getDestinationById(destinationId)
 
     override suspend fun deleteById(id: Int): Int =
@@ -47,16 +47,16 @@ class LocalDestinationRepositoryImpl @Inject constructor(
     override suspend fun update(destination: DestinationEntity): Int =
         roomService.update(destination)
 
-    override suspend fun create(destination: DestinationEntity): Int =
+    override suspend fun create(destination: DestinationEntity) =
         roomService.create(destination)
 
-    override suspend fun insertAll(destinationList: List<DestinationEntity>): Int =
+    override suspend fun insertAll(destinationList: List<DestinationEntity>) =
         roomService.insertAll(destinationList)
 
     override suspend fun clearDestinations(): Int =
         roomService.clearDestinations()
 
-    override suspend fun getLastId(): Int? =
+    override suspend fun getLastId(): Int =
         roomService.getLastId()
 
 }

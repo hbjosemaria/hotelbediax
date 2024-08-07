@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 fun SingleScreenTopAppBar(
     navigateBack: () -> Unit,
     screenTitleResId: Int?,
-    scrollBehavior: TopAppBarScrollBehavior
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     CenterAlignedTopAppBar(
         scrollBehavior = scrollBehavior,
