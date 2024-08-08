@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joheba.hotelbediax.R
 import com.joheba.hotelbediax.domain.core.Destination
-import com.joheba.hotelbediax.domain.usecase.DestinationFilterOptions
 import com.joheba.hotelbediax.domain.usecase.DestinationUseCase
 import com.joheba.hotelbediax.ui.common.contracts.SnackbarMessenger
 import com.joheba.hotelbediax.ui.common.utils.SnackbarItem
@@ -17,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DestinationViewModel @Inject constructor(
-    private val useCase: DestinationUseCase
+    private val useCase: DestinationUseCase,
 ) : ViewModel(), SnackbarMessenger {
 
     private val _state = MutableStateFlow(DestinationState())
@@ -27,17 +26,18 @@ class DestinationViewModel @Inject constructor(
         getDestinations()
     }
 
-    fun getDestinations(filterOptions: DestinationFilterOptions? = null) {
+    fun getDestinations(filters: DestinationFilters = DestinationFilters()) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _state.value = _state.value.copy(
-                    result = DestinationStateResult.Success(useCase.getDestinations(filterOptions))
+                    result = DestinationStateResult.Success(useCase.getDestinations(filters))
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     result = DestinationStateResult.Error(DestinationStateResultError.GENERIC_ERROR)
                 )
             }
+
         }
     }
 

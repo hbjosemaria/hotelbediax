@@ -12,7 +12,7 @@ import com.joheba.hotelbediax.data.repository.ExternalDestinationRepository
 import com.joheba.hotelbediax.data.repository.LocalDestinationRepository
 import com.joheba.hotelbediax.data.repository.LocalDestinationTempRepository
 import com.joheba.hotelbediax.domain.core.Destination
-import com.joheba.hotelbediax.domain.core.DestinationType
+import com.joheba.hotelbediax.ui.main.destination.DestinationFilters
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -22,32 +22,33 @@ class DestinationUseCase @Inject constructor(
     private val apiRepository: ExternalDestinationRepository,
     private val destinationRepository: LocalDestinationRepository,
     private val tempRepository: LocalDestinationTempRepository,
-    private val remoteMediator: DestinationRemoteMediator
+    private val remoteMediator: DestinationRemoteMediator,
 ) {
-    fun getDestinations(filter: DestinationFilterOptions? = null): Flow<PagingData<Destination>> =
+
+    fun getDestinations(filters: DestinationFilters): Flow<PagingData<Destination>> =
         Pager(
+            //You can either adapt this RemoteMediator to a single page method fetching
             config = PagingConfig(
-                pageSize = 20,
-                prefetchDistance = 40,
-                initialLoadSize = 60
+                pageSize = 100,
+                prefetchDistance = 50,
+                initialLoadSize = 200
             ),
+            //Or to a full list fetching method, but by doing this, you have to assist the RemoteMediator with an AssistedInject including the Int value for the whole list size
+//            config = PagingConfig(
+//                pageSize = 210000,
+//                prefetchDistance = 50,
+//                initialLoadSize = 210000
+//            ),
             remoteMediator = remoteMediator,
             pagingSourceFactory = {
-                destinationRepository.getAll()
+                //Data will be always presented from the single source of truth with a PagingSource
+                destinationRepository.getAll(
+                    filters
+                )
             }
         ).flow
             .map { pagingData ->
-                pagingData.filter { destinationEntity ->
-                    when (filter) {
-                        null -> true
-                        DestinationFilterOptions.CITY -> {
-                            destinationEntity.type == DestinationFilterOptions.CITY.destinationType
-                        }
-                        DestinationFilterOptions.COUNTRY -> {
-                            destinationEntity.type == DestinationFilterOptions.COUNTRY.destinationType
-                        }
-                    }
-                }.map {
+                pagingData.map {
                     it.toDomain()
                 }
             }
@@ -84,13 +85,4 @@ class DestinationUseCase @Inject constructor(
         }
         return result
     }
-
-    //TODO: add functions for filtering based in Destination parameters
-
-}
-
-//TODO: adapt this filter options to the other parameters that could have been used in a search
-enum class DestinationFilterOptions(val destinationType: DestinationType) {
-    CITY(DestinationType.CITY),
-    COUNTRY(DestinationType.COUNTRY)
 }

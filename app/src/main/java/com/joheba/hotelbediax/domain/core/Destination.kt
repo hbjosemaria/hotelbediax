@@ -13,7 +13,7 @@ data class Destination(
     val description: String,
     val countryCode: String,
     val type: DestinationType,
-    val lastModify: LocalDateTime,
+    val lastModify: LocalDateTime
 ) {
     fun toEntity(): DestinationEntity =
         DestinationEntity(

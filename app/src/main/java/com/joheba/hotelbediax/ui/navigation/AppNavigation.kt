@@ -6,10 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.joheba.hotelbediax.ui.destinationdetails.DestinationDetailsScreen
 import com.joheba.hotelbediax.ui.main.destination.DestinationScreen
 import com.joheba.hotelbediax.ui.main.home.HomeScreen
@@ -54,14 +56,20 @@ fun AppNavigation(
                         route = route
                     )
                 },
-                updateSelectedNavigationIndex = {newIndex: Int ->
+                updateSelectedNavigationIndex = { newIndex: Int ->
                     appNavigationViewModel.updateSelectedNavigationIndex(newIndex)
+                },
+                navigateToDestinationDetails = { destinationId: Int ->
+                    navHostController.navigate(MainAppScreens.DestinationDetails.buildArgRoute(destinationId))
                 }
             )
         }
 
         composable(
-            route = MainAppScreens.DestinationDetails.route
+            route = MainAppScreens.DestinationDetails.buildRoute(),
+            arguments = listOf(navArgument(NavigationVariableNames.DESTINATION_ID.variableName) {
+                type = NavType.IntType
+            })
         ) {
             val destinationId = navHostController.currentBackStackEntry?.arguments
                 ?.getInt(NavigationVariableNames.DESTINATION_ID.variableName)

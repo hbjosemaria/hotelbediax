@@ -47,20 +47,39 @@ class FakeBackendInterceptor : Interceptor {
     private fun getDestination(
         chain: Interceptor.Chain
     ) : Response {
-        val response = DestinationListResponseDto(
+        val pageQuery = chain.request().url.queryParameter("page")
+        val response = pageQuery?.let{ page ->
+            val pageValue = page.toInt()
+            DestinationListResponseDto(
+                page = pageValue,
+                results = (100 downTo 1).map { index ->
+                    val id = 210001 - (pageValue * index)
+                    DestinationDto(
+                        id = id,
+                        name = "Destination $id",
+                        description = "An inspiring description for destination $id, one of the most exciting places of the world.",
+                        countryCode = if (id % 2 == 0) "es" else "en",
+                        type = if (id % 2 == 0) DestinationType.CITY else DestinationType.COUNTRY,
+                        lastModify = LocalDateTime.now().minusDays((Math.random() * 10).toLong()).minusHours((Math.random() * 10).toLong()).minusMinutes((Math.random() * 10).toLong())
+                    )
+                },
+                totalPages = 2100,
+                totalResults = 210000
+            )
+        } ?: DestinationListResponseDto(
             page = 1,
-            results = (1..200).map {
+            results = (210000 downTo 1).map {
                 DestinationDto(
                     id = it,
                     name = "Destination $it",
-                    description = "Description of destination $it",
+                    description = "An inspiring description for destination $it, one of the most exciting places of the world.",
                     countryCode = if (it % 2 == 0) "es" else "en",
                     type = if (it % 2 == 0) DestinationType.CITY else DestinationType.COUNTRY,
-                    lastModify = LocalDateTime.now().minusHours((Math.random() * 10).toLong())
+                    lastModify = LocalDateTime.now().minusDays((Math.random() * 10).toLong()).minusHours((Math.random() * 10).toLong()).minusMinutes((Math.random() * 10).toLong())
                 )
             },
             totalPages = 1,
-            totalResults = 200
+            totalResults = 210000
         )
         val jsonResponse = gson.toJson(response)
         return Response.Builder()

@@ -14,4 +14,13 @@
     <string name="destinations_error_message">Something went wrong when accesing to the destinations</string>
     <string name="destination_detail_error_message">Something went wrong when accesing to the destination details</string>
     <string name="destination_new">New destination</string>
+    <string name="last_modify">Last modify: %s</string>
+    <string name="country_code">Co. code: %s</string>
+    <string name="type">Type: %s</string>
+    <string name="filter_id">ID</string>
+    <string name="filter_name">Name</string>
+    <string name="filter_description">Description</string>
+    <string name="filter_type">Type</string>
+    <string name="filter_country_code">Co. code</string>
+    <string name="filter_last_modify">Last modifiy</string>
 </resources>

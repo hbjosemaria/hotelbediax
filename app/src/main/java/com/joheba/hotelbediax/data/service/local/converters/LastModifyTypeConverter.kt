@@ -9,11 +9,11 @@ class LastModifyTypeConverter {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     @TypeConverter
-    fun fromLastModifyType(lastModify: LocalDateTime): String =
-        lastModify.format(formatter)
+    fun fromLastModifyType(lastModify: LocalDateTime?): String? =
+        lastModify?.format(formatter)
 
 
     @TypeConverter
-    fun toLastModifyType(lastModify: String): LocalDateTime =
-        LocalDateTime.parse(lastModify, formatter)
+    fun toLastModifyType(lastModify: String?): LocalDateTime? =
+        lastModify?.let{LocalDateTime.parse(it, formatter)}
 }

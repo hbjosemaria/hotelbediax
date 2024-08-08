@@ -1,17 +1,27 @@
 package com.joheba.hotelbediax.data.repository
 
 import androidx.paging.PagingSource
+import androidx.room.RawQuery
+import androidx.room.util.query
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.data.model.external.DestinationListResponseDto
 import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.data.service.external.ApiDestinationService
 import com.joheba.hotelbediax.data.service.local.DestinationDao
 import com.joheba.hotelbediax.data.service.local.HotelBediaXDatabase
+import com.joheba.hotelbediax.domain.core.DestinationType
+import com.joheba.hotelbediax.ui.main.destination.DestinationFilters
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 //Both interfaces can be modified to manage also Language selection if needed
 interface LocalDestinationRepository {
-    fun getAll() : PagingSource<Int, DestinationEntity>
+    fun getAll(
+        filters: DestinationFilters
+    ): PagingSource<Int, DestinationEntity>
+
     suspend fun getDestinationById(destinationId: Int): DestinationEntity
     suspend fun deleteById(id: Int): Int
     suspend fun update(destination: DestinationEntity): Int
@@ -33,10 +43,19 @@ interface ExternalDestinationRepository {
 }
 
 class LocalDestinationRepositoryImpl @Inject constructor(
-    private val roomService: DestinationDao
+    private val roomService: DestinationDao,
 ) : LocalDestinationRepository {
-    override fun getAll(): PagingSource<Int, DestinationEntity> =
-        roomService.getAll()
+    override fun getAll(
+        filters: DestinationFilters
+    ): PagingSource<Int, DestinationEntity> =
+        roomService.getAll(
+            id = filters.id,
+            name = filters.name,
+            description = filters.description,
+            type = filters.type,
+            countryCode = filters.countryCode,
+            lastModify = filters.lastModify
+        )
 
     override suspend fun getDestinationById(destinationId: Int): DestinationEntity =
         roomService.getDestinationById(destinationId)
@@ -62,7 +81,7 @@ class LocalDestinationRepositoryImpl @Inject constructor(
 }
 
 class ExternalDestinationRepositoryImpl @Inject constructor(
-    private val apiService: ApiDestinationService
+    private val apiService: ApiDestinationService,
 ) : ExternalDestinationRepository {
 
     override suspend fun getAll(): DestinationListResponseDto =

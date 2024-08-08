@@ -81,8 +81,11 @@ class DestinationRemoteMediator @Inject constructor(
             }
         }
 
-
+        //You can either test this by using the single page fetching method
         val result = externalDestinationRepository.getAll(page)
+
+        //Or the full list fetching method
+//        val result = externalDestinationRepository.getAll()
         val destinationList = result.results.map { destinationDto ->
             destinationDto.toEntity()
         }

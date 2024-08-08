@@ -7,9 +7,11 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.Update
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.data.model.local.DestinationRemoteKeyEntity
@@ -21,6 +23,8 @@ import com.joheba.hotelbediax.data.repository.LocalDestinationRepository
 import com.joheba.hotelbediax.data.service.local.converters.DestinationTempActionConverter
 import com.joheba.hotelbediax.data.service.local.converters.DestinationTypeConverter
 import com.joheba.hotelbediax.data.service.local.converters.LastModifyTypeConverter
+import com.joheba.hotelbediax.domain.core.DestinationType
+import java.time.LocalDateTime
 
 @Database(
     entities = [
@@ -42,55 +46,67 @@ abstract class HotelBediaXDatabase : RoomDatabase() {
 }
 
 @Dao
-interface DestinationDao : LocalDestinationRepository {
-    @Query("select * from destination order by id desc")
-    override fun getAll(): PagingSource<Int, DestinationEntity>
+interface DestinationDao {
+    @Query("SELECT * FROM destination WHERE (:id IS NULL OR id = :id) " +
+            "AND (:name IS NULL OR name LIKE '%' || :name || '%') " +
+            "AND (:description IS NULL OR description LIKE '%' || :description || '%') " +
+            "AND (:type IS NULL OR type = :type) " +
+            "AND (:countryCode IS NULL OR countryCode = :countryCode) " +
+            "AND (:lastModify IS NULL OR lastModify = :lastModify) ORDER BY id DESC")
+    fun getAll(
+        id: Int?,
+        name: String?,
+        description: String?,
+        type: DestinationType?,
+        countryCode: String?,
+        lastModify: LocalDateTime?
+    ): PagingSource<Int, DestinationEntity>
 
-    @Query("select * from destination where id = :destinationId")
-    override suspend fun getDestinationById(destinationId: Int): DestinationEntity
+    @Query("SELECT * FROM destination WHERE id = :destinationId")
+    suspend fun getDestinationById(destinationId: Int): DestinationEntity
 
-    @Query("delete from destination where id = :id")
-    override suspend fun deleteById(id: Int): Int
+    @Query("DELETE FROM destination WHERE id = :id")
+    suspend fun deleteById(id: Int): Int
 
     @Update
-    override suspend fun update(destination: DestinationEntity): Int
+    suspend fun update(destination: DestinationEntity): Int
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    override suspend fun create(destination: DestinationEntity)
+    suspend fun create(destination: DestinationEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    override suspend fun insertAll(destinationList: List<DestinationEntity>)
+    suspend fun insertAll(destinationList: List<DestinationEntity>)
 
-    @Query("delete from destination")
-    override suspend fun clearDestinations(): Int
+    @Query("DELETE FROM destination")
+    suspend fun clearDestinations(): Int
 
-    @Query("select id from destination order by id desc limit 1")
-    override suspend fun getLastId(): Int
+    @Query("SELECT id FROM destination ORDER BY id DESC LIMIT 1")
+    suspend fun getLastId(): Int
 }
 
 @Dao
-interface DestinationRemoteKeyDao : DestinationRemoteKeyRepository {
+interface DestinationRemoteKeyDao {
 
-    @Query("select * from destination_remote_key where destinationId = :destinationId")
-    override suspend fun getKey(destinationId: Int): DestinationRemoteKeyEntity
+    @Query("SELECT * FROM destination_remote_key WHERE destinationId = :destinationId")
+    suspend fun getKey(destinationId: Int): DestinationRemoteKeyEntity
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    override suspend fun insertAll(remoteKeyList: List<DestinationRemoteKeyEntity>)
+    suspend fun insertAll(remoteKeyList: List<DestinationRemoteKeyEntity>)
 
-    @Query("delete from destination_remote_key")
-    override suspend fun clearKeys(): Int
+    @Query("DELETE FROM destination_remote_key")
+    suspend fun clearKeys(): Int
 }
 
 @Dao
-interface LocalDestinationTempDao : LocalDestinationTempRepository {
+interface LocalDestinationTempDao {
 
-    @Query("select * from destination_temp")
-    override suspend fun getAll(): List<DestinationTempEntity>
+    @Query("SELECT * FROM destination_temp")
+    suspend fun getAll(): List<DestinationTempEntity>
 
-    @Query("delete from destination_temp")
-    override suspend fun clearAll()
+    @Query("DELETE FROM destination_temp")
+    suspend fun clearAll()
 
     @Insert
-    override suspend fun addEnqueuedRecord(destinationTemp: DestinationTempEntity)
+    suspend fun addEnqueuedRecord(destinationTemp: DestinationTempEntity)
 
 }
