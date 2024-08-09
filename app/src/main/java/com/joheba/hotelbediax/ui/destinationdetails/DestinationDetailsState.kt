@@ -1,9 +1,11 @@
 package com.joheba.hotelbediax.ui.destinationdetails
 
 import com.joheba.hotelbediax.domain.core.Destination
+import com.joheba.hotelbediax.ui.common.utils.SnackbarItem
 
 data class DestinationDetailsState(
-    val result: DestinationDetailsStateResult = DestinationDetailsStateResult.Loading
+    val result: DestinationDetailsStateResult = DestinationDetailsStateResult.Loading,
+    val snackbarItem: SnackbarItem = SnackbarItem()
 )
 
 sealed class DestinationDetailsStateResult {

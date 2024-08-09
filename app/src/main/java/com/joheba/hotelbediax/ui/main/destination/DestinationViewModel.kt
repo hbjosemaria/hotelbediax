@@ -2,22 +2,20 @@ package com.joheba.hotelbediax.ui.main.destination
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joheba.hotelbediax.R
-import com.joheba.hotelbediax.domain.core.Destination
+import com.joheba.hotelbediax.domain.core.DestinationType
 import com.joheba.hotelbediax.domain.usecase.DestinationUseCase
-import com.joheba.hotelbediax.ui.common.contracts.SnackbarMessenger
-import com.joheba.hotelbediax.ui.common.utils.SnackbarItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
 class DestinationViewModel @Inject constructor(
     private val useCase: DestinationUseCase,
-) : ViewModel(), SnackbarMessenger {
+) : ViewModel(){
 
     private val _state = MutableStateFlow(DestinationState())
     val state = _state.asStateFlow()
@@ -26,11 +24,11 @@ class DestinationViewModel @Inject constructor(
         getDestinations()
     }
 
-    fun getDestinations(filters: DestinationFilters = DestinationFilters()) {
+    fun getDestinations() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _state.value = _state.value.copy(
-                    result = DestinationStateResult.Success(useCase.getDestinations(filters))
+                    result = DestinationStateResult.Success(useCase.getDestinations(state.value.filters))
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
@@ -41,74 +39,66 @@ class DestinationViewModel @Inject constructor(
         }
     }
 
-    fun createDestination(destination: Destination) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                useCase.createDestination(destination)
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_created
-                )
-            } catch (e: Exception) {
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_not_created,
-                    isError = true
-                )
-            }
-        }
-    }
-
-    fun updateDestination(destination: Destination) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                useCase.updateDestination(destination)
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_updated
-                )
-            } catch (e: Exception) {
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_not_updated,
-                    isError = true
-                )
-            }
-        }
-    }
-
-    fun deleteDestination(destination: Destination) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                useCase.deleteDestinationById(destination)
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_deleted
-                )
-            } catch (e: Exception) {
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_not_deleted,
-                    isError = true
-                )
-            }
-        }
-    }
-
-    override fun resetSnackbar() {
+    fun applyFilters() {
         _state.value = _state.value.copy(
-            snackbarItem = SnackbarItem()
+            areFiltersApplied = true
         )
+        getDestinations()
     }
 
-    override fun updateSnackbar(show: Boolean, messageResId: Int, isError: Boolean) {
+    fun resetFilters() {
         _state.value = _state.value.copy(
-            snackbarItem = SnackbarItem(
-                show = show,
-                messageResId = messageResId,
-                isError = isError
+            filters = DestinationFilters(),
+            areFiltersApplied = false
+        )
+        getDestinations()
+    }
+
+    fun updateFilterId(id: Int?) {
+        _state.value = _state.value.copy(
+            filters = _state.value.filters.copy(
+                id = id
             )
         )
     }
 
+    fun updateFilterName(name: String?) {
+        _state.value = _state.value.copy(
+            filters = _state.value.filters.copy(
+                name = name
+            )
+        )
+    }
+
+    fun updateFilterDescription(description: String?) {
+        _state.value = _state.value.copy(
+            filters = _state.value.filters.copy(
+                description = description
+            )
+        )
+    }
+
+    fun updateFilterType(type: DestinationType?) {
+        _state.value = _state.value.copy(
+            filters = _state.value.filters.copy(
+                type = type
+            )
+        )
+    }
+
+    fun updateFilterCountryCode(countryCode: String?) {
+        _state.value = _state.value.copy(
+            filters = _state.value.filters.copy(
+                countryCode = countryCode
+            )
+        )
+    }
+
+    fun updateFilterLastModify(lastModify: LocalDateTime?) {
+        _state.value = _state.value.copy(
+            filters = _state.value.filters.copy(
+                lastModify = lastModify
+            )
+        )
+    }
 }

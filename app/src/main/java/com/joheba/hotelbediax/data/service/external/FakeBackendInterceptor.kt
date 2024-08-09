@@ -10,6 +10,7 @@ import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import java.time.LocalDateTime
+import java.util.Locale
 
 class FakeBackendInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -52,18 +53,18 @@ class FakeBackendInterceptor : Interceptor {
             val pageValue = page.toInt()
             DestinationListResponseDto(
                 page = pageValue,
-                results = (100 downTo 1).map { index ->
+                results = (200 downTo 1).map { index ->
                     val id = 210001 - (pageValue * index)
                     DestinationDto(
                         id = id,
                         name = "Destination $id",
                         description = "An inspiring description for destination $id, one of the most exciting places of the world.",
-                        countryCode = if (id % 2 == 0) "es" else "en",
+                        countryCode = Locale.getISOCountries()[(Math.random() * 10).toInt()],
                         type = if (id % 2 == 0) DestinationType.CITY else DestinationType.COUNTRY,
                         lastModify = LocalDateTime.now().minusDays((Math.random() * 10).toLong()).minusHours((Math.random() * 10).toLong()).minusMinutes((Math.random() * 10).toLong())
                     )
                 },
-                totalPages = 2100,
+                totalPages = 1050,
                 totalResults = 210000
             )
         } ?: DestinationListResponseDto(
@@ -73,7 +74,7 @@ class FakeBackendInterceptor : Interceptor {
                     id = it,
                     name = "Destination $it",
                     description = "An inspiring description for destination $it, one of the most exciting places of the world.",
-                    countryCode = if (it % 2 == 0) "es" else "en",
+                    countryCode = Locale.getISOCountries()[(Math.random() * 10).toInt()],
                     type = if (it % 2 == 0) DestinationType.CITY else DestinationType.COUNTRY,
                     lastModify = LocalDateTime.now().minusDays((Math.random() * 10).toLong()).minusHours((Math.random() * 10).toLong()).minusMinutes((Math.random() * 10).toLong())
                 )

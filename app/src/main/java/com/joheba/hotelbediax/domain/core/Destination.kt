@@ -1,6 +1,7 @@
 package com.joheba.hotelbediax.domain.core
 
 import androidx.compose.runtime.Immutable
+import com.joheba.hotelbediax.R
 import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.data.model.local.DestinationTempEntity
@@ -47,7 +48,7 @@ data class Destination(
         )
 }
 
-enum class DestinationType {
-    COUNTRY,
-    CITY
+enum class DestinationType(val nameResId: Int) {
+    COUNTRY(R.string.country),
+    CITY(R.string.city)
 }

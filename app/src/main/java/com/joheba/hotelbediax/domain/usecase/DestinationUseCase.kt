@@ -29,14 +29,15 @@ class DestinationUseCase @Inject constructor(
         Pager(
             //You can either adapt this RemoteMediator to a single page method fetching
             config = PagingConfig(
-                pageSize = 100,
-                prefetchDistance = 50,
-                initialLoadSize = 200
+                pageSize = 200,
+                prefetchDistance = 100,
+                initialLoadSize = 400
             ),
             //Or to a full list fetching method, but by doing this, you have to assist the RemoteMediator with an AssistedInject including the Int value for the whole list size
+            // In case you want to test this option, then
 //            config = PagingConfig(
 //                pageSize = 210000,
-//                prefetchDistance = 50,
+//                prefetchDistance = 200,
 //                initialLoadSize = 210000
 //            ),
             remoteMediator = remoteMediator,

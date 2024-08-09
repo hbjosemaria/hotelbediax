@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 data class DestinationState(
     val result: DestinationStateResult = DestinationStateResult.Loading,
     val filters: DestinationFilters = DestinationFilters(),
+    val areFiltersApplied: Boolean = false,
     val scrollToTop: Boolean = false,
     val snackbarItem: SnackbarItem = SnackbarItem(),
 )

@@ -1,6 +1,7 @@
 package com.joheba.hotelbediax.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,6 +24,12 @@ fun AppNavigation(
 ) {
     val navHostController = rememberNavController()
     val appNavigationState by appNavigationViewModel.appNavigationState.collectAsState()
+
+    navHostController.addOnDestinationChangedListener { _, destination, _ ->
+        if (destination.route == MainAppScreens.Home.route) {
+            appNavigationViewModel.updateSelectedNavigationIndex(0)
+        }
+    }
 
     NavHost(
         navController = navHostController,

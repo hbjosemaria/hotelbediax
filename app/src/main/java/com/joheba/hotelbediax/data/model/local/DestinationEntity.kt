@@ -7,7 +7,10 @@ import com.joheba.hotelbediax.domain.core.Destination
 import com.joheba.hotelbediax.domain.core.DestinationType
 import java.time.LocalDateTime
 
-@Entity(tableName = "destination")
+@Entity(
+    tableName = "destination",
+    indices = [Index(value = ["id"])]
+)
 data class DestinationEntity (
     @PrimaryKey
     val id: Int,

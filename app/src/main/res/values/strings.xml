@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">HotelBediaX</string>
-    <string name="home" translatable="false">Home</string>
+    <string name="home">Home</string>
     <string name="destinations">Destinations</string>
     <string name="destination_detail">Destination details</string>
     <string name="empty_message" translatable="false" />
@@ -17,10 +17,23 @@
     <string name="last_modify">Last modify: %s</string>
     <string name="country_code">Co. code: %s</string>
     <string name="type">Type: %s</string>
-    <string name="filter_id">ID</string>
+    <string name="filter_id">Destination ID</string>
     <string name="filter_name">Name</string>
     <string name="filter_description">Description</string>
     <string name="filter_type">Type</string>
     <string name="filter_country_code">Co. code</string>
     <string name="filter_last_modify">Last modifiy</string>
+    <string name="filter_id_placeholder">Filter by ID</string>
+    <string name="filter_name_placeholder">Filter by name</string>
+    <string name="filter_description_placeholder">Filter by description</string>
+    <string name="reset">Reset</string>
+    <string name="apply">Apply</string>
+    <string name="filter_bottom_sheet_header">Filter by</string>
+    <string name="filter_country_code_placeholder">Filter by country code</string>
+    <string name="filter_last_modify_placeholder">Filter by last modify</string>
+    <string name="select">Select</string>
+    <string name="cancel">Cancel</string>
+    <string name="country">Country</string>
+    <string name="city">City</string>
+    <string name="filter_no_result">Didn\'t find any destination</string>
 </resources>

@@ -50,7 +50,6 @@ class DestinationRemoteMediator @Inject constructor(
             }
             currentTime > lastCacheTimeout -> {
                 database.withTransaction {
-                    remoteKeyRepository.clearKeys()
                     dataStoreRepository.saveData(
                         dataType = DataStoreVariableType.LongType,
                         dataName = DataStoreVariableName.CACHE_TIMEOUT.variableName,
@@ -86,6 +85,7 @@ class DestinationRemoteMediator @Inject constructor(
 
         //Or the full list fetching method
 //        val result = externalDestinationRepository.getAll()
+
         val destinationList = result.results.map { destinationDto ->
             destinationDto.toEntity()
         }
@@ -98,8 +98,10 @@ class DestinationRemoteMediator @Inject constructor(
             )
         }
         database.withTransaction {
+            //If you want to prevent data from being wiped after cache invalidation, then comment this conditional
             if (loadType == LoadType.REFRESH) {
                 destinationDao.clearDestinations()
+                remoteKeyRepository.clearKeys()
             }
             destinationDao.insertAll(destinationList)
             remoteKeyRepository.insertAll(destinationRemoteKeyList)

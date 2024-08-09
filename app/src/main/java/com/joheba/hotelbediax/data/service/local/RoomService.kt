@@ -32,7 +32,7 @@ import java.time.LocalDateTime
         DestinationTempEntity::class,
         DestinationRemoteKeyEntity::class
     ],
-    version = 3,
+    version = 4,
 )
 @TypeConverters(
     DestinationTypeConverter::class,

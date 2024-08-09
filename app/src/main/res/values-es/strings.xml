@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home">Home</string>
+    <string name="home">Inicio</string>
     <string name="destinations">Destinos</string>
     <string name="destination_detail">Detalles del destino</string>
     <string name="empty_message" />
@@ -17,10 +17,23 @@
     <string name="last_modify">Última modificación: %s</string>
     <string name="country_code">Cód. pais: %s</string>
     <string name="type">Tipo: %s</string>
-    <string name="filter_id">ID</string>
+    <string name="filter_id">ID de destino</string>
     <string name="filter_name">Nombre</string>
     <string name="filter_description">Descripción</string>
     <string name="filter_type">Tipo</string>
     <string name="filter_country_code">Cód. pais</string>
     <string name="filter_last_modify">Última mod.</string>
+    <string name="filter_id_placeholder">Filtrar por ID</string>
+    <string name="filter_name_placeholder">Filtrar por nombre</string>
+    <string name="filter_description_placeholder">Filtrar por descripción</string>
+    <string name="reset">Reiniciar</string>
+    <string name="apply">Aplicar</string>
+    <string name="filter_bottom_sheet_header">Filtrar por</string>
+    <string name="filter_country_code_placeholder">Filtrar por cód. país</string>
+    <string name="filter_last_modify_placeholder">Filtrar por últtima mod.</string>
+    <string name="select">Seleccionar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="country">País</string>
+    <string name="city">Ciudad</string>
+    <string name="filter_no_result">No encontramos ningún destino</string>
 </resources>
