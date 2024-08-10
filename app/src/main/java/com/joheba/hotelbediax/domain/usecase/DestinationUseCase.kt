@@ -4,7 +4,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.filter
 import androidx.paging.map
 import com.joheba.hotelbediax.data.model.local.DestinationTempEntity
 import com.joheba.hotelbediax.data.remotemediator.DestinationRemoteMediator
@@ -15,6 +14,7 @@ import com.joheba.hotelbediax.domain.core.Destination
 import com.joheba.hotelbediax.ui.main.destination.DestinationFilters
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
@@ -58,21 +58,30 @@ class DestinationUseCase @Inject constructor(
         destinationRepository.getDestinationById(destinationId).toDomain()
 
     suspend fun createDestination(destination: Destination): Boolean {
-        return try {
-            destinationRepository.create(destination.toEntity())
-            apiRepository.create(destination.toDto())
+        var locallyInserted = false
+        try {
+            val newDestination = destination.copy(
+                id = destinationRepository.getNewId()
+            )
+            if (destinationRepository.create(newDestination.toEntity()) > 0) {
+                locallyInserted = true
+            }
+            apiRepository.create(newDestination.toDto())
         } catch (e: Exception) {
             tempRepository.addEnqueuedRecord(destination.toTempEntity(DestinationTempEntity.DestinationTempEntityAction.CREATE))
-            false
         }
+        return locallyInserted
     }
 
     suspend fun updateDestination(destination: Destination): Boolean {
-        val result = destinationRepository.update(destination.toEntity()) == 1
+        val updatedDestination = destination.copy(
+            lastModify = LocalDateTime.now()
+        )
+        val result = destinationRepository.update(updatedDestination.toEntity()) == 1
         try {
-            apiRepository.update(destination.id, destination.toDto())
+            apiRepository.update(updatedDestination.id, updatedDestination.toDto())
         } catch (e: Exception) {
-            tempRepository.addEnqueuedRecord(destination.toTempEntity(DestinationTempEntity.DestinationTempEntityAction.UPDATE))
+            tempRepository.addEnqueuedRecord(updatedDestination.toTempEntity(DestinationTempEntity.DestinationTempEntityAction.UPDATE))
         }
         return result
     }

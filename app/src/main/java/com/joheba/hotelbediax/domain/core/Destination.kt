@@ -9,12 +9,12 @@ import java.time.LocalDateTime
 
 @Immutable
 data class Destination(
-    val id: Int,
-    val name: String,
-    val description: String,
-    val countryCode: String,
-    val type: DestinationType,
-    val lastModify: LocalDateTime
+    val id: Int = 0,
+    val name: String = "",
+    val description: String = "",
+    val countryCode: String = "",
+    val type: DestinationType = DestinationType.COUNTRY,
+    val lastModify: LocalDateTime = LocalDateTime.now()
 ) {
     fun toEntity(): DestinationEntity =
         DestinationEntity(

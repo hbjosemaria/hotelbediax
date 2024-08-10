@@ -36,4 +36,11 @@
     <string name="country">País</string>
     <string name="city">Ciudad</string>
     <string name="filter_no_result">No encontramos ningún destino</string>
+    <string name="add">Añadir destino</string>
+    <string name="all_fields_must_be_filled">Todos los campos deben ser rellenados y seleccionados</string>
+    <string name="update">Actualizar</string>
+    <string name="delete">Borrar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="delete_dialog_title">Confirmar borrado</string>
+    <string name="delete_dialog_text">Al hacerlo, este destino será borrado permanentemente.</string>
 </resources>

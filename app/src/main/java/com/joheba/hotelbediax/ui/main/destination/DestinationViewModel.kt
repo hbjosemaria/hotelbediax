@@ -40,10 +40,24 @@ class DestinationViewModel @Inject constructor(
     }
 
     fun applyFilters() {
-        _state.value = _state.value.copy(
-            areFiltersApplied = true
-        )
-        getDestinations()
+        when {
+            state.value.filters.isAnyFilterFilled() -> {
+                _state.value = _state.value.copy(
+                    areFiltersApplied = true
+                )
+                getDestinations()
+            }
+            !state.value.filters.isAnyFilterFilled() && state.value.areFiltersApplied -> {
+                _state.value = _state.value.copy(
+                    areFiltersApplied = false
+                )
+                getDestinations()
+            } else -> {
+                _state.value = _state.value.copy(
+                    areFiltersApplied = false
+                )
+            }
+        }
     }
 
     fun resetFilters() {

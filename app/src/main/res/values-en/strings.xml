@@ -36,4 +36,11 @@
     <string name="country">Country</string>
     <string name="city">City</string>
     <string name="filter_no_result">Didn\'t find any destination</string>
+    <string name="add">Add destination</string>
+    <string name="all_fields_must_be_filled">All fields must be filled and selected</string>
+    <string name="update">Update</string>
+    <string name="delete">Delete</string>
+    <string name="confirm">Confirm</string>
+    <string name="delete_dialog_title">Confirm deletion</string>
+    <string name="delete_dialog_text">By doing so, this destination will be permanently deleted.</string>
 </resources>

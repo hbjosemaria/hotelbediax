@@ -33,4 +33,8 @@ data class DestinationFilters(
     val countryCode: String? = null,
     val type: DestinationType? = null,
     val lastModify: LocalDateTime? = null
-)
+) {
+    fun isAnyFilterFilled() : Boolean {
+        return id != null || name != null || description != null || countryCode != null || type != null || lastModify != null
+    }
+}

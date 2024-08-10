@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joheba.hotelbediax.R
 import com.joheba.hotelbediax.domain.core.Destination
+import com.joheba.hotelbediax.domain.core.DestinationType
 import com.joheba.hotelbediax.domain.usecase.DestinationUseCase
 import com.joheba.hotelbediax.ui.common.contracts.SnackbarMessenger
 import com.joheba.hotelbediax.ui.common.utils.SnackbarItem
@@ -38,10 +39,15 @@ class DestinationDetailsViewModel @AssistedInject constructor(
         destinationId?.let{
             viewModelScope.launch(Dispatchers.IO) {
                 try{
+                    val destination = useCase.getDestinationById(it)
                     _state.value = _state.value.copy(
                         result = DestinationDetailsStateResult.Success(
-                            destination = useCase.getDestinationById(it)
-                        )
+                            destination = destination
+                        ),
+                        name = destination.name,
+                        description = destination.description,
+                        type = destination.type,
+                        countryCode = destination.countryCode
                     )
                 } catch (e: Exception) {
                     _state.value = _state.value.copy(
@@ -63,10 +69,14 @@ class DestinationDetailsViewModel @AssistedInject constructor(
     fun updateDestination(destination: Destination) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                useCase.updateDestination(destination)
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_updated
+                val newDestination = destination.copy(
+                    name = state.value.name,
+                    description = state.value.description,
+                    countryCode = state.value.countryCode,
+                    type = state.value.type
+                )
+                _state.value = _state.value.copy(
+                    isOperationPerformed = useCase.updateDestination(newDestination)
                 )
             } catch (e: Exception) {
                 updateSnackbar(
@@ -81,10 +91,8 @@ class DestinationDetailsViewModel @AssistedInject constructor(
     fun deleteDestination(destination: Destination) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                useCase.deleteDestinationById(destination)
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_deleted
+                _state.value = _state.value.copy(
+                    isOperationPerformed = useCase.deleteDestinationById(destination)
                 )
             } catch (e: Exception) {
                 updateSnackbar(
@@ -94,6 +102,48 @@ class DestinationDetailsViewModel @AssistedInject constructor(
                 )
             }
         }
+    }
+
+    fun updateName(name: String) {
+        _state.value = _state.value.copy(
+            name = name
+        )
+    }
+
+    fun updateDescription(description: String) {
+        _state.value = _state.value.copy(
+            description = description
+        )
+    }
+
+    fun updateCountryCode(countryCode: String) {
+        _state.value = _state.value.copy(
+            countryCode = countryCode
+        )
+    }
+
+    fun updateType(type: DestinationType) {
+        _state.value = _state.value.copy(
+            type = type
+        )
+    }
+
+    fun checkAllFieldsAreFilled() : Boolean {
+        val areAllFilled = state.value.name.isNotBlank() &&
+                state.value.description.isNotBlank() &&
+                state.value.countryCode.isNotBlank()
+
+        if (!areAllFilled) {
+            _state.value = _state.value.copy(
+                snackbarItem = SnackbarItem(
+                    show = true,
+                    messageResId = R.string.all_fields_must_be_filled,
+                    isError = true
+                )
+            )
+        }
+
+        return areAllFilled
     }
 
     override fun resetSnackbar() {

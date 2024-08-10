@@ -1,19 +1,12 @@
 package com.joheba.hotelbediax.data.repository
 
 import androidx.paging.PagingSource
-import androidx.room.RawQuery
-import androidx.room.util.query
-import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.sqlite.db.SupportSQLiteQuery
 import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.data.model.external.DestinationListResponseDto
 import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.data.service.external.ApiDestinationService
 import com.joheba.hotelbediax.data.service.local.DestinationDao
-import com.joheba.hotelbediax.data.service.local.HotelBediaXDatabase
-import com.joheba.hotelbediax.domain.core.DestinationType
 import com.joheba.hotelbediax.ui.main.destination.DestinationFilters
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 //Both interfaces can be modified to manage also Language selection if needed
@@ -25,10 +18,10 @@ interface LocalDestinationRepository {
     suspend fun getDestinationById(destinationId: Int): DestinationEntity
     suspend fun deleteById(id: Int): Int
     suspend fun update(destination: DestinationEntity): Int
-    suspend fun create(destination: DestinationEntity)
+    suspend fun create(destination: DestinationEntity): Long
     suspend fun insertAll(destinationList: List<DestinationEntity>)
     suspend fun clearDestinations(): Int
-    suspend fun getLastId(): Int
+    suspend fun getNewId(): Int
 }
 
 interface ExternalDestinationRepository {
@@ -66,7 +59,7 @@ class LocalDestinationRepositoryImpl @Inject constructor(
     override suspend fun update(destination: DestinationEntity): Int =
         roomService.update(destination)
 
-    override suspend fun create(destination: DestinationEntity) =
+    override suspend fun create(destination: DestinationEntity) : Long =
         roomService.create(destination)
 
     override suspend fun insertAll(destinationList: List<DestinationEntity>) =
@@ -75,8 +68,8 @@ class LocalDestinationRepositoryImpl @Inject constructor(
     override suspend fun clearDestinations(): Int =
         roomService.clearDestinations()
 
-    override suspend fun getLastId(): Int =
-        roomService.getLastId()
+    override suspend fun getNewId(): Int =
+        roomService.getLastId()+1
 
 }
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joheba.hotelbediax.R
 import com.joheba.hotelbediax.domain.core.Destination
+import com.joheba.hotelbediax.domain.core.DestinationType
 import com.joheba.hotelbediax.domain.usecase.DestinationUseCase
 import com.joheba.hotelbediax.ui.common.contracts.SnackbarMessenger
 import com.joheba.hotelbediax.ui.common.utils.SnackbarItem
@@ -22,13 +23,17 @@ class NewDestinationViewModel @Inject constructor(
     private val _state = MutableStateFlow(NewDestinationState())
     val state = _state.asStateFlow()
 
-    fun createDestination(destination: Destination) {
+    fun createDestination() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                useCase.createDestination(destination)
-                updateSnackbar(
-                    show = true,
-                    messageResId = R.string.destination_created
+                val destination = Destination (
+                    name = state.value.name,
+                    description = state.value.description,
+                    countryCode = state.value.countryCode,
+                    type = state.value.type
+                )
+                _state.value = _state.value.copy(
+                    isDestinationCreated = useCase.createDestination(destination)
                 )
             } catch (e: Exception) {
                 updateSnackbar(
@@ -38,6 +43,48 @@ class NewDestinationViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun updateName(name: String) {
+        _state.value = _state.value.copy(
+            name = name
+        )
+    }
+
+    fun updateDescription(description: String) {
+        _state.value = _state.value.copy(
+            description = description
+        )
+    }
+
+    fun updateCountryCode(countryCode: String) {
+        _state.value = _state.value.copy(
+            countryCode = countryCode
+        )
+    }
+
+    fun updateType(type: DestinationType) {
+        _state.value = _state.value.copy(
+            type = type
+        )
+    }
+
+    fun checkAllFieldsAreFilled() : Boolean {
+        val areAllFilled = state.value.name.isNotBlank() &&
+                state.value.description.isNotBlank() &&
+                state.value.countryCode.isNotBlank()
+
+        if (!areAllFilled) {
+            _state.value = _state.value.copy(
+                snackbarItem = SnackbarItem(
+                    show = true,
+                    messageResId = R.string.all_fields_must_be_filled,
+                    isError = true
+                )
+            )
+        }
+
+        return areAllFilled
     }
 
     override fun resetSnackbar() {
@@ -55,5 +102,4 @@ class NewDestinationViewModel @Inject constructor(
             )
         )
     }
-
 }

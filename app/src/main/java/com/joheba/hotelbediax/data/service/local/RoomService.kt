@@ -72,7 +72,7 @@ interface DestinationDao {
     suspend fun update(destination: DestinationEntity): Int
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun create(destination: DestinationEntity)
+    suspend fun create(destination: DestinationEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(destinationList: List<DestinationEntity>)

@@ -68,6 +68,9 @@ fun AppNavigation(
                 },
                 navigateToDestinationDetails = { destinationId: Int ->
                     navHostController.navigate(MainAppScreens.DestinationDetails.buildArgRoute(destinationId))
+                },
+                navigateToNewDestination = {
+                    navHostController.navigate(MainAppScreens.NewDestination.route)
                 }
             )
         }

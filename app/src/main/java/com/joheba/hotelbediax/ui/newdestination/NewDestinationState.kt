@@ -8,5 +8,6 @@ data class NewDestinationState (
     val description: String = "",
     val countryCode: String = "",
     val type: DestinationType = DestinationType.COUNTRY,
+    val isDestinationCreated: Boolean = false,
     val snackbarItem: SnackbarItem = SnackbarItem()
 )

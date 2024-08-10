@@ -2,7 +2,6 @@
 
 package com.joheba.hotelbediax.ui.main.destination
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,25 +10,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +47,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -73,6 +67,11 @@ import com.joheba.hotelbediax.domain.core.DestinationType
 import com.joheba.hotelbediax.ui.common.composables.ColumnItemDivider
 import com.joheba.hotelbediax.ui.common.composables.ImageWithMessage
 import com.joheba.hotelbediax.ui.common.composables.LoadingIndicator
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.CountryCodeField
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.CountryCodeSelector
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.DescriptionField
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.NameField
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.TypeField
 import com.joheba.hotelbediax.ui.common.composables.scaffolds.StandardNavigationSuiteScaffold
 import com.joheba.hotelbediax.ui.common.composables.topbar.MainTopAppBar
 import com.joheba.hotelbediax.ui.theme.filterNotOkButton
@@ -92,6 +91,7 @@ fun DestinationScreen(
     selectedNavigationIndex: Int,
     navigateToItemRoute: (String) -> Unit,
     navigateToDestinationDetails: (Int) -> Unit,
+    navigateToNewDestination: () -> Unit,
     updateSelectedNavigationIndex: (Int) -> Unit,
     destinationViewModel: DestinationViewModel = hiltViewModel(),
 ) {
@@ -105,14 +105,14 @@ fun DestinationScreen(
     val dateTimeFormatter =
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
     var isBottomSheetOpened by rememberSaveable { mutableStateOf(false) }
-    var openedCountryCodeSelector by rememberSaveable { mutableStateOf(false) }
-    var openedLastModifyPicker by rememberSaveable { mutableStateOf(false) }
+    var isCountryCodeSelectorOpened by rememberSaveable { mutableStateOf(false) }
+    var isLastModifyPickerOpened by rememberSaveable { mutableStateOf(false) }
 
     StandardNavigationSuiteScaffold(
         selectedNavigationIndex = selectedNavigationIndex,
         navigateToItemRoute = { route ->
             navigateToItemRoute(route)
-            openedCountryCodeSelector = false
+            isCountryCodeSelectorOpened = false
         },
         updateSelectedNavigationIndex = updateSelectedNavigationIndex,
         scrollToTop = {
@@ -158,6 +158,19 @@ fun DestinationScreen(
                                     isBottomSheetOpened = true
                                 }
                             )
+                        },
+                        floatingActionButton = {
+                            FloatingActionButton(
+                                onClick = {
+                                    navigateToNewDestination()
+                                },
+                                containerColor = filterOkButton
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Add,
+                                    contentDescription = Icons.Filled.Add.name
+                                )
+                            }
                         }
                     ) { paddingValues ->
                         when {
@@ -205,11 +218,13 @@ fun DestinationScreen(
                                     }
                                 }
                             }
+
                         }
                         if (isBottomSheetOpened) {
                             ModalBottomSheet(
                                 modifier = Modifier
-                                    .fillMaxSize(),
+                                    .fillMaxSize()
+                                    .padding(paddingValues),
                                 sheetState = sheetState,
                                 properties = ModalBottomSheetProperties(
                                     shouldDismissOnBackPress = true
@@ -264,22 +279,22 @@ fun DestinationScreen(
                                         scope.launch {
                                             sheetState.hide()
                                             isBottomSheetOpened = false
-                                            openedCountryCodeSelector = true
+                                            isCountryCodeSelectorOpened = true
                                         }
                                     },
                                     openLastModifyPicker = {
-                                        openedLastModifyPicker = true
+                                        isLastModifyPickerOpened = true
                                     }
                                 )
                             }
                         }
-                        if (openedCountryCodeSelector) {
+                        if (isCountryCodeSelectorOpened) {
                             CountryCodeSelector(
                                 modifier = Modifier
                                     .padding(paddingValues),
-                                dismissCountryCodeSelector = {
+                                onDismiss = {
                                     scope.launch {
-                                        openedCountryCodeSelector = false
+                                        isCountryCodeSelectorOpened = false
                                         isBottomSheetOpened = true
                                         sheetState.show()
                                     }
@@ -289,15 +304,16 @@ fun DestinationScreen(
                                 }
                             )
                         }
-                        if (openedLastModifyPicker) {
+                        if (isLastModifyPickerOpened) {
                             LastModifyPicker(
                                 modifier = Modifier
-                                    .padding(paddingValues),
+                                    .padding(paddingValues)
+                                    .align(Alignment.Center),
                                 onDateSelected = { newLastModify ->
                                     destinationViewModel.updateFilterLastModify(newLastModify)
                                 },
                                 onDismiss = {
-                                    openedLastModifyPicker = false
+                                    isLastModifyPickerOpened = false
                                 }
                             )
                         }
@@ -432,38 +448,41 @@ private fun BottomSheetContent(
             BottomSheetHeader(
                 modifier = childModifier
             )
-            IdFilter(
+            IdField(
                 modifier = childModifier,
                 value = filters.id,
                 onValueChange = updateId
             )
-            NameFilter(
+            NameField(
                 modifier = childModifier,
                 value = filters.name,
                 onValueChange = updateName
             )
-            DescriptionFilter(
+            DescriptionField(
                 modifier = childModifier,
                 value = filters.description,
                 onValueChange = updateDescription,
             )
-            CountryCodeFilter(
+            CountryCodeField(
                 modifier = childModifier,
                 value = filters.countryCode,
                 onValueChange = updateCountryCode,
                 openCountryCodeSelector = openCountryCodeSelector,
             )
-            LastModifyFilter(
+            LastModifyField(
                 modifier = childModifier,
                 value = filters.lastModify,
                 dateTimeFormatter = dateTimeFormatter,
                 onValueChange = updateLastModify,
                 openLastModifyPicker = openLastModifyPicker
             )
-            TypeFilter(
+            TypeField(
                 modifier = childModifier,
                 value = filters.type,
-                onValueChange = updateType
+                onValueChange = updateType,
+                selectedIcon = Icons.Filled.Remove,
+                unSelectedIcon = Icons.Filled.Add,
+                selectedFieldColor = filterNotOkButton
             )
         }
         FilterButtons(
@@ -495,7 +514,7 @@ private fun BottomSheetHeader(
 }
 
 @Composable
-private fun IdFilter(
+private fun IdField(
     modifier: Modifier = Modifier,
     value: Int?,
     onValueChange: (Int?) -> Unit,
@@ -554,285 +573,7 @@ private fun IdFilter(
 }
 
 @Composable
-private fun NameFilter(
-    modifier: Modifier = Modifier,
-    value: String?,
-    onValueChange: (String?) -> Unit,
-) {
-    Row(
-        modifier = modifier
-    ) {
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value ?: "",
-            onValueChange = { newValue ->
-                if (newValue.isNotBlank()) {
-                    onValueChange(newValue)
-                } else onValueChange(null)
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.TextFields,
-                    contentDescription = Icons.Filled.TextFields.name
-                )
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.filter_name)
-                )
-            },
-            placeholder = {
-                Text(
-                    text = stringResource(id = R.string.filter_name_placeholder)
-                )
-            },
-            trailingIcon = {
-                value?.let {
-                    IconButton(
-                        onClick = {
-                            onValueChange(null)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = Icons.Filled.Close.name
-                        )
-                    }
-                }
-            }
-        )
-    }
-}
-
-@Composable
-private fun DescriptionFilter(
-    modifier: Modifier = Modifier,
-    value: String?,
-    onValueChange: (String?) -> Unit,
-) {
-    Row(
-        modifier = modifier
-    ) {
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value ?: "",
-            onValueChange = { newValue ->
-                if (newValue.isNotBlank()) {
-                    onValueChange(newValue)
-                } else onValueChange(null)
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.TextFields,
-                    contentDescription = Icons.Filled.TextFields.name
-                )
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.filter_description)
-                )
-            },
-            placeholder = {
-                Text(
-                    text = stringResource(id = R.string.filter_description_placeholder)
-                )
-            },
-            trailingIcon = {
-                value?.let {
-                    IconButton(
-                        onClick = {
-                            onValueChange(null)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = Icons.Filled.Close.name
-                        )
-                    }
-                }
-            }
-        )
-    }
-}
-
-@Composable
-private fun CountryCodeFilter(
-    modifier: Modifier = Modifier,
-    value: String?,
-    onValueChange: (String?) -> Unit,
-    openCountryCodeSelector: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable {
-                openCountryCodeSelector()
-            }
-    ) {
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value?.uppercase() ?: "",
-            onValueChange = { newValue ->
-                if (newValue.isNotBlank()) {
-                    onValueChange(newValue)
-                } else onValueChange(null)
-            },
-            enabled = false,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Flag,
-                    contentDescription = Icons.Filled.Flag.name
-                )
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.filter_country_code)
-                )
-            },
-            placeholder = {
-                Text(
-                    text = stringResource(id = R.string.filter_country_code_placeholder)
-                )
-            },
-            trailingIcon = {
-                value?.let {
-                    IconButton(
-                        onClick = {
-                            onValueChange(null)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = Icons.Filled.Close.name
-                        )
-                    }
-                }
-            },
-            colors = TextFieldDefaults.colors(
-                disabledContainerColor = TextFieldDefaults.colors().unfocusedContainerColor,
-                disabledPrefixColor = TextFieldDefaults.colors().unfocusedPrefixColor,
-                disabledSuffixColor = TextFieldDefaults.colors().unfocusedSuffixColor,
-                disabledLabelColor = TextFieldDefaults.colors().unfocusedLabelColor,
-                disabledTextColor = TextFieldDefaults.colors().unfocusedTextColor,
-                disabledIndicatorColor = TextFieldDefaults.colors().unfocusedIndicatorColor,
-                disabledPlaceholderColor = TextFieldDefaults.colors().unfocusedPlaceholderColor,
-                disabledLeadingIconColor = TextFieldDefaults.colors().unfocusedLeadingIconColor,
-                disabledTrailingIconColor = TextFieldDefaults.colors().unfocusedTrailingIconColor,
-                disabledSupportingTextColor = TextFieldDefaults.colors().unfocusedSupportingTextColor,
-            )
-        )
-    }
-}
-
-@Composable
-private fun CountryCodeSelector(
-    modifier: Modifier = Modifier,
-    dismissCountryCodeSelector: () -> Unit,
-    updateCountryCode: (String?) -> Unit,
-) {
-    val countryCodeList = java.util.Locale.getISOCountries()
-    val readableCountryCodeList = countryCodeList.map {
-        java.util.Locale("", it).displayCountry
-    }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background.copy(alpha = .95f))
-            .clickable {
-                dismissCountryCodeSelector()
-            },
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .widthIn(
-                    max = 300.dp
-                )
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .align(Alignment.CenterHorizontally)
-                .clip(RoundedCornerShape(8.dp))
-        ) {
-            items(
-                count = countryCodeList.size,
-                key = { index ->
-                    countryCodeList[index]
-                }
-            ) { index ->
-                Column(
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .padding(6.dp)
-                        .clickable {
-                            updateCountryCode(countryCodeList[index])
-                            dismissCountryCodeSelector()
-                        },
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = readableCountryCodeList[index] + " (${countryCodeList[index]})",
-                        textAlign = TextAlign.Center
-                    )
-                    ColumnItemDivider()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TypeFilter(
-    modifier: Modifier = Modifier,
-    value: DestinationType?,
-    onValueChange: (DestinationType?) -> Unit,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val isCountrySelected = value == DestinationType.COUNTRY
-        val isCitySelected = value == DestinationType.CITY
-
-        ElevatedButton(
-            colors = ButtonDefaults.elevatedButtonColors(
-                containerColor = if (isCountrySelected) filterNotOkButton else Color.Unspecified
-            ),
-            onClick = {
-                onValueChange(if (isCountrySelected) null else DestinationType.COUNTRY)
-            }
-        ) {
-            Text(
-                text = stringResource(id = DestinationType.COUNTRY.nameResId)
-            )
-            Icon(
-                imageVector = if (isCountrySelected) Icons.Filled.Remove else Icons.Filled.Add,
-                contentDescription = if (isCountrySelected) Icons.Filled.Remove.name else Icons.Filled.Add.name
-            )
-        }
-        ElevatedButton(
-            colors = ButtonDefaults.elevatedButtonColors(
-                containerColor = if (isCitySelected) filterNotOkButton else Color.Unspecified
-            ),
-            onClick = {
-                onValueChange(if (isCitySelected) null else DestinationType.CITY)
-            }
-        ) {
-            Text(
-                text = stringResource(id = DestinationType.CITY.nameResId)
-            )
-            Icon(
-                imageVector = if (isCitySelected) Icons.Filled.Remove else Icons.Filled.Add,
-                contentDescription = if (isCitySelected) Icons.Filled.Remove.name else Icons.Filled.Add.name
-            )
-        }
-    }
-}
-
-@Composable
-private fun LastModifyFilter(
+private fun LastModifyField(
     modifier: Modifier = Modifier,
     value: LocalDateTime?,
     dateTimeFormatter: DateTimeFormatter,
@@ -911,6 +652,7 @@ private fun LastModifyFilter(
     }
 }
 
+//FIXME: adjust this picker and the consecutive use case/repository to adapt make the value suitable for filter/search in the database
 @Composable
 private fun LastModifyPicker(
     modifier: Modifier = Modifier,

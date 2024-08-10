@@ -12,6 +12,8 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import java.time.LocalDateTime
 import java.util.Locale
 
+//Important note: to test the case where CRUD can't be synced in the API, change the response boolean parameter to false and its HTTP code to 409
+// By doing so, you could verify that this operations are being registered in the temp table to sync them when the device has again internet connectivity
 class FakeBackendInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val requestUrl = chain.request().url.toUri().toString()
