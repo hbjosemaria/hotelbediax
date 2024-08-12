@@ -1,5 +1,6 @@
 package com.joheba.hotelbediax.data.di
 
+import android.content.Context
 import com.google.gson.GsonBuilder
 import com.joheba.hotelbediax.BuildConfig
 import com.joheba.hotelbediax.data.service.external.ApiDestinationService
@@ -9,6 +10,7 @@ import com.joheba.hotelbediax.data.service.external.LocalDateTimeTypeAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -26,16 +28,16 @@ object RetrofitModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(FakeBackendInterceptor())
+            .addInterceptor(FakeBackendInterceptor(context))
             .build()
     }
 
     @Provides
     @Singleton
     fun provideRetrofit(
-        okHttpClient: OkHttpClient
+        okHttpClient: OkHttpClient,
     ): Retrofit {
         val retrofit = Retrofit.Builder()
             .baseUrl(ApiUrl.BASE.url)

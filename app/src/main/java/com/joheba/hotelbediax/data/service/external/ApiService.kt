@@ -2,7 +2,7 @@ package com.joheba.hotelbediax.data.service.external
 
 import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.data.model.external.DestinationListResponseDto
-import com.joheba.hotelbediax.data.repository.ExternalDestinationRepository
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -11,41 +11,41 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface ApiDestinationService: ExternalDestinationRepository {
+interface ApiDestinationService {
 
     @GET(ApiUrl.DESTINATION)
-    override suspend fun getAll(): DestinationListResponseDto
+    suspend fun getAll(): ResponseBody
 
     @GET(ApiUrl.DESTINATION)
-    override suspend fun getAll(@Query("page") page: Int): DestinationListResponseDto
+    suspend fun getAll(@Query("page") page: Int): DestinationListResponseDto
 
     @DELETE("${ApiUrl.DESTINATION}{id}")
-    override suspend fun deleteById(
-        @Path("id") id: Int
+    suspend fun deleteById(
+        @Path("id") id: Int,
     ): Boolean
 
     @DELETE(ApiUrl.DESTINATION)
-    override suspend fun deleteBunchById(destinationIdList: List<Int>): Boolean
+    suspend fun deleteBunchById(@Query("ids") destinationIdList: List<Int>): Boolean
 
     @PUT("${ApiUrl.DESTINATION}{id}")
-    override suspend fun update(
+    suspend fun update(
         @Path("id") id: Int,
-        @Body destination: DestinationDto
+        @Body destination: DestinationDto,
     ): Boolean
 
     @PUT(ApiUrl.DESTINATION)
-    override suspend fun updateBunch(
-        @Body destinationList: List<DestinationDto>
+    suspend fun updateBunch(
+        @Body destinationList: List<DestinationDto>,
     ): Boolean
 
     @POST(ApiUrl.DESTINATION)
-    override suspend fun create(
-        @Body destination: DestinationDto
+    suspend fun create(
+        @Body destination: DestinationDto,
     ): Boolean
 
     @POST(ApiUrl.DESTINATION)
-    override suspend fun createBunch(
-        @Body destinationList: List<DestinationDto>
+    suspend fun createBunch(
+        @Body destinationList: List<DestinationDto>,
     ): Boolean
 }
 

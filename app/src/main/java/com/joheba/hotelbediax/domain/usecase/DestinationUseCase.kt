@@ -7,13 +7,16 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.joheba.hotelbediax.data.model.local.DestinationTempEntity
 import com.joheba.hotelbediax.data.remotemediator.DestinationRemoteMediator
+import com.joheba.hotelbediax.data.repository.DestinationTempRepository
 import com.joheba.hotelbediax.data.repository.ExternalDestinationRepository
 import com.joheba.hotelbediax.data.repository.LocalDestinationRepository
-import com.joheba.hotelbediax.data.repository.LocalDestinationTempRepository
 import com.joheba.hotelbediax.domain.core.Destination
 import com.joheba.hotelbediax.ui.main.destination.DestinationFilters
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -21,31 +24,22 @@ import javax.inject.Inject
 class DestinationUseCase @Inject constructor(
     private val apiRepository: ExternalDestinationRepository,
     private val destinationRepository: LocalDestinationRepository,
-    private val tempRepository: LocalDestinationTempRepository,
-    private val remoteMediator: DestinationRemoteMediator,
+    private val destinationTempRepository: DestinationTempRepository,
+    private val remoteMediator: DestinationRemoteMediator
 ) {
 
     fun getDestinations(filters: DestinationFilters): Flow<PagingData<Destination>> =
         Pager(
-            //You can either adapt this RemoteMediator to a single page method fetching
             config = PagingConfig(
                 pageSize = 200,
                 prefetchDistance = 100,
                 initialLoadSize = 400
             ),
-            //Or to a full list fetching method, but by doing this, you have to assist the RemoteMediator with an AssistedInject including the Int value for the whole list size
-            // In case you want to test this option, then
-//            config = PagingConfig(
-//                pageSize = 210000,
-//                prefetchDistance = 200,
-//                initialLoadSize = 210000
-//            ),
-            remoteMediator = remoteMediator,
+            //If API endpoint allows pagination, then consider using a RemoteMediator
+            //RemoteMediator uses cache invalidation. This feature could be extended to workers if needed
+//            remoteMediator = remoteMediator,
             pagingSourceFactory = {
-                //Data will be always presented from the single source of truth with a PagingSource
-                destinationRepository.getAll(
-                    filters
-                )
+                destinationRepository.getAll(filters)
             }
         ).flow
             .map { pagingData ->
@@ -59,16 +53,20 @@ class DestinationUseCase @Inject constructor(
 
     suspend fun createDestination(destination: Destination): Boolean {
         var locallyInserted = false
+        val newDestination = destination.copy(
+            id = destinationRepository.getNewId()
+        )
         try {
-            val newDestination = destination.copy(
-                id = destinationRepository.getNewId()
-            )
             if (destinationRepository.create(newDestination.toEntity()) > 0) {
                 locallyInserted = true
             }
             apiRepository.create(newDestination.toDto())
         } catch (e: Exception) {
-            tempRepository.addEnqueuedRecord(destination.toTempEntity(DestinationTempEntity.DestinationTempEntityAction.CREATE))
+            destinationTempRepository.addEnqueuedRecord(
+                newDestination.toTempEntity(
+                    DestinationTempEntity.DestinationTempEntityAction.CREATE
+                )
+            )
         }
         return locallyInserted
     }
@@ -81,7 +79,11 @@ class DestinationUseCase @Inject constructor(
         try {
             apiRepository.update(updatedDestination.id, updatedDestination.toDto())
         } catch (e: Exception) {
-            tempRepository.addEnqueuedRecord(updatedDestination.toTempEntity(DestinationTempEntity.DestinationTempEntityAction.UPDATE))
+            destinationTempRepository.addEnqueuedRecord(
+                updatedDestination.toTempEntity(
+                    DestinationTempEntity.DestinationTempEntityAction.UPDATE
+                )
+            )
         }
         return result
     }
@@ -91,8 +93,47 @@ class DestinationUseCase @Inject constructor(
         try {
             apiRepository.deleteById(destination.id)
         } catch (e: Exception) {
-            tempRepository.addEnqueuedRecord(destination.toTempEntity(DestinationTempEntity.DestinationTempEntityAction.DELETE))
+            destinationTempRepository.addEnqueuedRecord(
+                destination.toTempEntity(
+                    DestinationTempEntity.DestinationTempEntityAction.DELETE
+                )
+            )
         }
         return result
+    }
+
+    suspend fun areOperationsPending(): Flow<Int> =
+        destinationTempRepository.pendingTempOperationsNumber()
+
+    suspend fun syncPendingOperations() {
+        withContext(Dispatchers.IO) {
+            val createOperations =
+                destinationTempRepository.getCreationOperations().map { it.toDto() }
+            val updateOperations =
+                destinationTempRepository.getUpdateOperations().map { it.toDto() }
+            val deleteOperations =
+                destinationTempRepository.getDeleteOperations().map { it.id }
+
+            launch {
+                if (createOperations.isNotEmpty()) {
+                    destinationTempRepository.syncCreateOperations(createOperations)
+                    destinationTempRepository.clearCreationOperations()
+                }
+            }
+
+            launch {
+                if (updateOperations.isNotEmpty()) {
+                    destinationTempRepository.syncUpdateOperations(updateOperations)
+                    destinationTempRepository.clearUpdateOperations()
+                }
+            }
+
+            launch {
+                if (deleteOperations.isNotEmpty()) {
+                    destinationTempRepository.syncDeleteOperations(deleteOperations)
+                    destinationTempRepository.clearDeleteOperations()
+                }
+            }
+        }
     }
 }

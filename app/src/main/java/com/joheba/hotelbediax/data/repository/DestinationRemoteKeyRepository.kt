@@ -11,7 +11,7 @@ interface DestinationRemoteKeyRepository {
 }
 
 class DestinationRemoteKeyRepositoryImpl @Inject constructor(
-    private val roomService: DestinationRemoteKeyDao
+    private val roomService: DestinationRemoteKeyDao,
 ) : DestinationRemoteKeyRepository {
     override suspend fun getKey(destinationId: Int): DestinationRemoteKeyEntity? =
         roomService.getKey(destinationId)

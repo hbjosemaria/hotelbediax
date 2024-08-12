@@ -12,31 +12,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,11 +38,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -70,6 +60,9 @@ import com.joheba.hotelbediax.ui.common.composables.LoadingIndicator
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.CountryCodeField
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.CountryCodeSelector
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.DescriptionField
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.IdField
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.LastModifyField
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.LastModifyPicker
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.NameField
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.TypeField
 import com.joheba.hotelbediax.ui.common.composables.scaffolds.StandardNavigationSuiteScaffold
@@ -78,11 +71,8 @@ import com.joheba.hotelbediax.ui.theme.filterNotOkButton
 import com.joheba.hotelbediax.ui.theme.filterOkButton
 import com.joheba.hotelbediax.ui.theme.filterSecondaryButton
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,11 +89,12 @@ fun DestinationScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val scrollState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
 
     val state by destinationViewModel.state.collectAsState()
-    val dateTimeFormatter =
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
+    val dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
     var isBottomSheetOpened by rememberSaveable { mutableStateOf(false) }
     var isCountryCodeSelectorOpened by rememberSaveable { mutableStateOf(false) }
     var isLastModifyPickerOpened by rememberSaveable { mutableStateOf(false) }
@@ -152,11 +143,12 @@ fun DestinationScreen(
                             MainTopAppBar(
                                 scrollBehavior = scrollBehavior,
                                 syncAction = {
-                                    //TODO: Add worker sync action
+                                    destinationViewModel.forceSyncTempOperations()
                                 },
                                 bottomSheetAction = {
                                     isBottomSheetOpened = true
-                                }
+                                },
+                                pendingOperations = state.pendingTempOperationsNumber
                             )
                         },
                         floatingActionButton = {
@@ -236,7 +228,6 @@ fun DestinationScreen(
                                 BottomSheetContent(
                                     filters = state.filters,
                                     areFiltersApplied = state.areFiltersApplied,
-                                    dateTimeFormatter = dateTimeFormatter,
                                     updateId = { newId ->
                                         destinationViewModel.updateFilterId(newId)
                                     },
@@ -280,10 +271,14 @@ fun DestinationScreen(
                                             sheetState.hide()
                                             isBottomSheetOpened = false
                                             isCountryCodeSelectorOpened = true
+                                            keyboardController?.hide()
+                                            focusManager.clearFocus()
                                         }
                                     },
                                     openLastModifyPicker = {
                                         isLastModifyPickerOpened = true
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
                                     }
                                 )
                             }
@@ -417,7 +412,6 @@ private fun BottomSheetContent(
     modifier: Modifier = Modifier,
     filters: DestinationFilters,
     areFiltersApplied: Boolean,
-    dateTimeFormatter: DateTimeFormatter,
     openCountryCodeSelector: () -> Unit,
     openLastModifyPicker: () -> Unit,
     updateId: (Int?) -> Unit,
@@ -434,6 +428,8 @@ private fun BottomSheetContent(
         .padding(
             vertical = 12.dp
         )
+
+    val dateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
 
     Column(
         modifier = modifier
@@ -513,179 +509,6 @@ private fun BottomSheetHeader(
     }
 }
 
-@Composable
-private fun IdField(
-    modifier: Modifier = Modifier,
-    value: Int?,
-    onValueChange: (Int?) -> Unit,
-) {
-    Row(
-        modifier = modifier
-    ) {
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number
-            ),
-            value = value?.toString() ?: "",
-            onValueChange = { newValue ->
-                try {
-                    if (newValue.isNotBlank()) {
-                        onValueChange(newValue.toInt())
-                    } else onValueChange(null)
-                } catch (e: NumberFormatException) {
-                    //Prevent value from being updated
-                }
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Numbers,
-                    contentDescription = Icons.Filled.Numbers.name
-                )
-            },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.filter_id)
-                )
-            },
-            placeholder = {
-                Text(
-                    text = stringResource(id = R.string.filter_id_placeholder)
-                )
-            },
-            trailingIcon = {
-                value?.let {
-                    IconButton(
-                        onClick = {
-                            onValueChange(null)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = Icons.Filled.Close.name
-                        )
-                    }
-                }
-            }
-        )
-    }
-}
-
-@Composable
-private fun LastModifyField(
-    modifier: Modifier = Modifier,
-    value: LocalDateTime?,
-    dateTimeFormatter: DateTimeFormatter,
-    onValueChange: (LocalDateTime?) -> Unit,
-    openLastModifyPicker: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    openLastModifyPicker()
-                }
-        ) {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                value = value?.format(dateTimeFormatter) ?: "",
-                onValueChange = { newValue ->
-                    if (newValue.isNotBlank()) {
-                        try {
-                            val dateTime = LocalDateTime.parse(newValue)
-                            onValueChange(dateTime)
-                        } catch (e: DateTimeParseException) {
-                            onValueChange(null)
-                        }
-                    } else onValueChange(null)
-                },
-                enabled = false,
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.CalendarMonth,
-                        contentDescription = Icons.Filled.CalendarMonth.name
-                    )
-                },
-                label = {
-                    Text(
-                        text = stringResource(id = R.string.filter_last_modify)
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = stringResource(id = R.string.filter_last_modify_placeholder)
-                    )
-                },
-                trailingIcon = {
-                    value?.let {
-                        IconButton(
-                            onClick = {
-                                onValueChange(null)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = Icons.Filled.Close.name
-                            )
-                        }
-                    }
-                },
-                colors = TextFieldDefaults.colors(
-                    disabledContainerColor = TextFieldDefaults.colors().unfocusedContainerColor,
-                    disabledPrefixColor = TextFieldDefaults.colors().unfocusedPrefixColor,
-                    disabledSuffixColor = TextFieldDefaults.colors().unfocusedSuffixColor,
-                    disabledLabelColor = TextFieldDefaults.colors().unfocusedLabelColor,
-                    disabledTextColor = TextFieldDefaults.colors().unfocusedTextColor,
-                    disabledIndicatorColor = TextFieldDefaults.colors().unfocusedIndicatorColor,
-                    disabledPlaceholderColor = TextFieldDefaults.colors().unfocusedPlaceholderColor,
-                    disabledLeadingIconColor = TextFieldDefaults.colors().unfocusedLeadingIconColor,
-                    disabledTrailingIconColor = TextFieldDefaults.colors().unfocusedTrailingIconColor,
-                    disabledSupportingTextColor = TextFieldDefaults.colors().unfocusedSupportingTextColor,
-                )
-            )
-        }
-    }
-}
-
-//FIXME: adjust this picker and the consecutive use case/repository to adapt make the value suitable for filter/search in the database
-@Composable
-private fun LastModifyPicker(
-    modifier: Modifier = Modifier,
-    onDateSelected: (LocalDateTime?) -> Unit,
-    onDismiss: () -> Unit,
-) {
-
-    val datePickerState = rememberDatePickerState()
-
-    DatePickerDialog(
-        modifier = modifier,
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val date = Instant.ofEpochMilli(datePickerState.selectedDateMillis ?: 0)
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime()
-                    onDateSelected(date)
-                    onDismiss()
-                }) {
-                Text(stringResource(id = R.string.select))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(id = R.string.cancel))
-            }
-        }
-    ) {
-        DatePicker(state = datePickerState)
-    }
-}
 
 @Composable
 private fun FilterButtons(

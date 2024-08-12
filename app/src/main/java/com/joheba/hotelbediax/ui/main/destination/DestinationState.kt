@@ -5,6 +5,8 @@ import com.joheba.hotelbediax.domain.core.Destination
 import com.joheba.hotelbediax.domain.core.DestinationType
 import com.joheba.hotelbediax.ui.common.utils.SnackbarItem
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import java.time.LocalDateTime
 
 data class DestinationState(
@@ -12,6 +14,7 @@ data class DestinationState(
     val filters: DestinationFilters = DestinationFilters(),
     val areFiltersApplied: Boolean = false,
     val scrollToTop: Boolean = false,
+    val pendingTempOperationsNumber: Int = 0,
     val snackbarItem: SnackbarItem = SnackbarItem(),
 )
 

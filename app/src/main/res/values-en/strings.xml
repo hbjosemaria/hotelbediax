@@ -38,9 +38,11 @@
     <string name="filter_no_result">Didn\'t find any destination</string>
     <string name="add">Add destination</string>
     <string name="all_fields_must_be_filled">All fields must be filled and selected</string>
-    <string name="update">Update</string>
+    <string name="update">Modify</string>
     <string name="delete">Delete</string>
     <string name="confirm">Confirm</string>
     <string name="delete_dialog_title">Confirm deletion</string>
     <string name="delete_dialog_text">By doing so, this destination will be permanently deleted.</string>
+    <string name="notification_syncing_destinations">Syncing destinations</string>
+    <string name="notification_syncing_body">Destinations are being synchronized in the background. You can still use the application meanwhile, but keep in mind all data won\'t be still loaded.</string>
 </resources>

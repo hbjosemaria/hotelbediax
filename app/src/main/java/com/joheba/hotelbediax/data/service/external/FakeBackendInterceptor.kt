@@ -1,20 +1,27 @@
 package com.joheba.hotelbediax.data.service.external
 
+import android.content.Context
 import com.joheba.hotelbediax.data.di.RetrofitModule.gson
 import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.data.model.external.DestinationListResponseDto
 import com.joheba.hotelbediax.domain.core.DestinationType
 import okhttp3.Interceptor
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Protocol
 import okhttp3.Response
+import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okio.BufferedSource
+import okio.buffer
+import okio.source
+import java.io.InputStream
 import java.time.LocalDateTime
 import java.util.Locale
 
-//Important note: to test the case where CRUD can't be synced in the API, change the response boolean parameter to false and its HTTP code to 409
+//Important note: to test the case where CRUD can't be synced in the API, change the response boolean parameter to false and its HTTP code to 400
 // By doing so, you could verify that this operations are being registered in the temp table to sync them when the device has again internet connectivity
-class FakeBackendInterceptor : Interceptor {
+class FakeBackendInterceptor(private val context: Context) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val requestUrl = chain.request().url.toUri().toString()
         val requestMethod = chain.request().method
@@ -40,20 +47,21 @@ class FakeBackendInterceptor : Interceptor {
                 deleteDestinationId(chain)
             }
             //DELETE to destination
-            requestMethod.contains("DELETE") && requestUrl.contains(ApiUrl.DESTINATION)-> {
+            requestMethod.contains("DELETE") && requestUrl.contains(ApiUrl.DESTINATION) -> {
                 deleteDestination(chain)
             }
+
             else -> chain.proceed(chain.request())
         }
     }
 
     private fun getDestination(
-        chain: Interceptor.Chain
-    ) : Response {
+        chain: Interceptor.Chain,
+    ): Response {
         val pageQuery = chain.request().url.queryParameter("page")
-        val response = pageQuery?.let{ page ->
-            val pageValue = page.toInt()
-            DestinationListResponseDto(
+        if (pageQuery != null) {
+            val pageValue = pageQuery.toInt()
+            val response = DestinationListResponseDto(
                 page = pageValue,
                 results = (200 downTo 1).map { index ->
                     val id = 210001 - (pageValue * index)
@@ -63,47 +71,48 @@ class FakeBackendInterceptor : Interceptor {
                         description = "An inspiring description for destination $id, one of the most exciting places of the world.",
                         countryCode = Locale.getISOCountries()[(Math.random() * 10).toInt()],
                         type = if (id % 2 == 0) DestinationType.CITY else DestinationType.COUNTRY,
-                        lastModify = LocalDateTime.now().minusDays((Math.random() * 10).toLong()).minusHours((Math.random() * 10).toLong()).minusMinutes((Math.random() * 10).toLong())
+                        lastModify = LocalDateTime.now().minusDays((Math.random() * 10).toLong())
+                            .minusHours((Math.random() * 10).toLong())
+                            .minusMinutes((Math.random() * 10).toLong())
                     )
                 },
                 totalPages = 1050,
                 totalResults = 210000
             )
-        } ?: DestinationListResponseDto(
-            page = 1,
-            results = (210000 downTo 1).map {
-                DestinationDto(
-                    id = it,
-                    name = "Destination $it",
-                    description = "An inspiring description for destination $it, one of the most exciting places of the world.",
-                    countryCode = Locale.getISOCountries()[(Math.random() * 10).toInt()],
-                    type = if (it % 2 == 0) DestinationType.CITY else DestinationType.COUNTRY,
-                    lastModify = LocalDateTime.now().minusDays((Math.random() * 10).toLong()).minusHours((Math.random() * 10).toLong()).minusMinutes((Math.random() * 10).toLong())
+
+            val jsonResponse = gson.toJson(response)
+            return Response.Builder()
+                .code(200)
+                .protocol(Protocol.HTTP_2)
+                .message("OK")
+                .body(
+                    jsonResponse
+                        .toByteArray()
+                        .toResponseBody(
+                            "application/json".toMediaTypeOrNull()
+                        )
                 )
-            },
-            totalPages = 1,
-            totalResults = 210000
-        )
-        val jsonResponse = gson.toJson(response)
-        return Response.Builder()
-            .code(200)
-            .protocol(Protocol.HTTP_2)
-            .message("OK")
-            .body(
-                jsonResponse
-                    .toByteArray()
-                    .toResponseBody(
-                        "application/json".toMediaTypeOrNull()
-                    )
-            )
-            .addHeader("content-type", "application/json")
-            .request(chain.request())
-            .build()
+                .addHeader("content-type", "application/json")
+                .request(chain.request())
+                .build()
+        } else {
+            val inputStream = readJsonFileAsStream(context)
+            val responseBody = StreamingResponseBody(inputStream)
+
+            return Response.Builder()
+                .code(200)
+                .protocol(Protocol.HTTP_2)
+                .message("OK")
+                .body(responseBody)
+                .addHeader("content-type", "application/json")
+                .request(chain.request())
+                .build()
+        }
     }
 
     private fun postDestination(
-        chain: Interceptor.Chain
-    ) : Response {
+        chain: Interceptor.Chain,
+    ): Response {
         //Faking a successful call
         val response = true
         val jsonResponse = gson.toJson(response)
@@ -124,8 +133,8 @@ class FakeBackendInterceptor : Interceptor {
     }
 
     private fun putDestinationId(
-        chain: Interceptor.Chain
-    ) : Response {
+        chain: Interceptor.Chain,
+    ): Response {
         //Faking a successful call
         val response = true
         val jsonResponse = gson.toJson(response)
@@ -146,8 +155,8 @@ class FakeBackendInterceptor : Interceptor {
     }
 
     private fun putDestination(
-        chain: Interceptor.Chain
-    ) : Response {
+        chain: Interceptor.Chain,
+    ): Response {
         //Faking a successful call
         val response = true
         val jsonResponse = gson.toJson(response)
@@ -168,8 +177,8 @@ class FakeBackendInterceptor : Interceptor {
     }
 
     private fun deleteDestinationId(
-        chain: Interceptor.Chain
-    ) : Response {
+        chain: Interceptor.Chain,
+    ): Response {
         //Faking a successful call
         val response = true
         val jsonResponse = gson.toJson(response)
@@ -190,8 +199,8 @@ class FakeBackendInterceptor : Interceptor {
     }
 
     private fun deleteDestination(
-        chain: Interceptor.Chain
-    ) : Response {
+        chain: Interceptor.Chain,
+    ): Response {
         //Faking a successful call
         val response = true
         val jsonResponse = gson.toJson(response)
@@ -210,4 +219,18 @@ class FakeBackendInterceptor : Interceptor {
             .request(chain.request())
             .build()
     }
+}
+
+class StreamingResponseBody(private val inputStream: InputStream) : ResponseBody() {
+    private val buffer = inputStream.source().buffer()
+
+    override fun contentType(): MediaType? = "application/json".toMediaTypeOrNull()
+
+    override fun contentLength(): Long = -1 // Unknown length
+
+    override fun source(): BufferedSource = buffer
+}
+
+fun readJsonFileAsStream(context: Context): InputStream {
+    return context.assets.open("preloaded_destinations.json")
 }

@@ -7,12 +7,14 @@ import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.data.service.external.ApiDestinationService
 import com.joheba.hotelbediax.data.service.local.DestinationDao
 import com.joheba.hotelbediax.ui.main.destination.DestinationFilters
+import okhttp3.ResponseBody
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 //Both interfaces can be modified to manage also Language selection if needed
 interface LocalDestinationRepository {
     fun getAll(
-        filters: DestinationFilters
+        filters: DestinationFilters,
     ): PagingSource<Int, DestinationEntity>
 
     suspend fun getDestinationById(destinationId: Int): DestinationEntity
@@ -25,7 +27,7 @@ interface LocalDestinationRepository {
 }
 
 interface ExternalDestinationRepository {
-    suspend fun getAll(): DestinationListResponseDto
+    suspend fun getAll(): ResponseBody
     suspend fun getAll(page: Int): DestinationListResponseDto
     suspend fun deleteById(id: Int): Boolean
     suspend fun deleteBunchById(destinationIdList: List<Int>): Boolean
@@ -39,7 +41,7 @@ class LocalDestinationRepositoryImpl @Inject constructor(
     private val roomService: DestinationDao,
 ) : LocalDestinationRepository {
     override fun getAll(
-        filters: DestinationFilters
+        filters: DestinationFilters,
     ): PagingSource<Int, DestinationEntity> =
         roomService.getAll(
             id = filters.id,
@@ -47,7 +49,7 @@ class LocalDestinationRepositoryImpl @Inject constructor(
             description = filters.description,
             type = filters.type,
             countryCode = filters.countryCode,
-            lastModify = filters.lastModify
+            lastModify = filters.lastModify?.format(DateTimeFormatter.ISO_LOCAL_DATE)
         )
 
     override suspend fun getDestinationById(destinationId: Int): DestinationEntity =
@@ -59,7 +61,7 @@ class LocalDestinationRepositoryImpl @Inject constructor(
     override suspend fun update(destination: DestinationEntity): Int =
         roomService.update(destination)
 
-    override suspend fun create(destination: DestinationEntity) : Long =
+    override suspend fun create(destination: DestinationEntity): Long =
         roomService.create(destination)
 
     override suspend fun insertAll(destinationList: List<DestinationEntity>) =
@@ -69,7 +71,7 @@ class LocalDestinationRepositoryImpl @Inject constructor(
         roomService.clearDestinations()
 
     override suspend fun getNewId(): Int =
-        roomService.getLastId()+1
+        roomService.getLastId() + 1
 
 }
 
@@ -77,7 +79,7 @@ class ExternalDestinationRepositoryImpl @Inject constructor(
     private val apiService: ApiDestinationService,
 ) : ExternalDestinationRepository {
 
-    override suspend fun getAll(): DestinationListResponseDto =
+    override suspend fun getAll(): ResponseBody =
         apiService.getAll()
 
     override suspend fun getAll(page: Int): DestinationListResponseDto =

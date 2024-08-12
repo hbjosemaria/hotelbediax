@@ -12,20 +12,26 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,12 +39,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.joheba.hotelbediax.R
 import com.joheba.hotelbediax.domain.core.DestinationType
 import com.joheba.hotelbediax.ui.common.composables.ColumnItemDivider
-import com.joheba.hotelbediax.ui.theme.filterNotOkButton
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 
 @Composable
@@ -46,7 +57,7 @@ fun NameField(
     modifier: Modifier = Modifier,
     value: String?,
     onValueChange: (String?) -> Unit,
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
 ) {
     Row(
         modifier = modifier
@@ -102,7 +113,7 @@ fun DescriptionField(
     modifier: Modifier = Modifier,
     value: String?,
     onValueChange: (String?) -> Unit,
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
 ) {
     Row(
         modifier = modifier
@@ -159,7 +170,7 @@ fun CountryCodeField(
     value: String?,
     onValueChange: (String?) -> Unit,
     openCountryCodeSelector: () -> Unit,
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
 ) {
     Row(
         modifier = modifier
@@ -213,18 +224,18 @@ fun CountryCodeField(
                 }
             },
             colors = if (isEnabled)
-            TextFieldDefaults.colors(
-                disabledContainerColor = TextFieldDefaults.colors().unfocusedContainerColor,
-                disabledPrefixColor = TextFieldDefaults.colors().unfocusedPrefixColor,
-                disabledSuffixColor = TextFieldDefaults.colors().unfocusedSuffixColor,
-                disabledLabelColor = TextFieldDefaults.colors().unfocusedLabelColor,
-                disabledTextColor = TextFieldDefaults.colors().unfocusedTextColor,
-                disabledIndicatorColor = TextFieldDefaults.colors().unfocusedIndicatorColor,
-                disabledPlaceholderColor = TextFieldDefaults.colors().unfocusedPlaceholderColor,
-                disabledLeadingIconColor = TextFieldDefaults.colors().unfocusedLeadingIconColor,
-                disabledTrailingIconColor = TextFieldDefaults.colors().unfocusedTrailingIconColor,
-                disabledSupportingTextColor = TextFieldDefaults.colors().unfocusedSupportingTextColor,
-            ) else TextFieldDefaults.colors()
+                TextFieldDefaults.colors(
+                    disabledContainerColor = TextFieldDefaults.colors().unfocusedContainerColor,
+                    disabledPrefixColor = TextFieldDefaults.colors().unfocusedPrefixColor,
+                    disabledSuffixColor = TextFieldDefaults.colors().unfocusedSuffixColor,
+                    disabledLabelColor = TextFieldDefaults.colors().unfocusedLabelColor,
+                    disabledTextColor = TextFieldDefaults.colors().unfocusedTextColor,
+                    disabledIndicatorColor = TextFieldDefaults.colors().unfocusedIndicatorColor,
+                    disabledPlaceholderColor = TextFieldDefaults.colors().unfocusedPlaceholderColor,
+                    disabledLeadingIconColor = TextFieldDefaults.colors().unfocusedLeadingIconColor,
+                    disabledTrailingIconColor = TextFieldDefaults.colors().unfocusedTrailingIconColor,
+                    disabledSupportingTextColor = TextFieldDefaults.colors().unfocusedSupportingTextColor,
+                ) else TextFieldDefaults.colors()
         )
     }
 }
@@ -292,7 +303,7 @@ fun TypeField(
     selectedFieldColor: Color,
     unSelectedIcon: ImageVector? = null,
     selectedIcon: ImageVector? = null,
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
 ) {
     Row(
         modifier = modifier,
@@ -347,5 +358,191 @@ fun TypeField(
                 }
             }
         }
+    }
+}
+
+
+@Composable
+fun LastModifyField(
+    modifier: Modifier = Modifier,
+    value: LocalDateTime?,
+    dateTimeFormatter: DateTimeFormatter,
+    onValueChange: (LocalDateTime?) -> Unit,
+    openLastModifyPicker: () -> Unit,
+    isEnabled: Boolean = true,
+) {
+    Row(
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    if (isEnabled) {
+                        openLastModifyPicker()
+                    }
+                }
+        ) {
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = value?.format(dateTimeFormatter) ?: "",
+                onValueChange = { newValue ->
+                    if (newValue.isNotBlank()) {
+                        try {
+                            val dateTime = LocalDateTime.parse(newValue)
+                            onValueChange(dateTime)
+                        } catch (e: DateTimeParseException) {
+                            onValueChange(null)
+                        }
+                    } else onValueChange(null)
+                },
+                enabled = false,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.CalendarMonth,
+                        contentDescription = Icons.Filled.CalendarMonth.name
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.filter_last_modify)
+                    )
+                },
+                placeholder = {
+                    Text(
+                        text = stringResource(id = R.string.filter_last_modify_placeholder)
+                    )
+                },
+                trailingIcon = {
+                    value?.let {
+                        if (isEnabled) {
+                            IconButton(
+                                onClick = {
+                                    onValueChange(null)
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = Icons.Filled.Close.name
+                                )
+                            }
+                        }
+
+
+                    }
+                },
+                colors = if (isEnabled) TextFieldDefaults.colors(
+                    disabledContainerColor = TextFieldDefaults.colors().unfocusedContainerColor,
+                    disabledPrefixColor = TextFieldDefaults.colors().unfocusedPrefixColor,
+                    disabledSuffixColor = TextFieldDefaults.colors().unfocusedSuffixColor,
+                    disabledLabelColor = TextFieldDefaults.colors().unfocusedLabelColor,
+                    disabledTextColor = TextFieldDefaults.colors().unfocusedTextColor,
+                    disabledIndicatorColor = TextFieldDefaults.colors().unfocusedIndicatorColor,
+                    disabledPlaceholderColor = TextFieldDefaults.colors().unfocusedPlaceholderColor,
+                    disabledLeadingIconColor = TextFieldDefaults.colors().unfocusedLeadingIconColor,
+                    disabledTrailingIconColor = TextFieldDefaults.colors().unfocusedTrailingIconColor,
+                    disabledSupportingTextColor = TextFieldDefaults.colors().unfocusedSupportingTextColor,
+                ) else TextFieldDefaults.colors()
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LastModifyPicker(
+    modifier: Modifier = Modifier,
+    onDateSelected: (LocalDateTime?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        modifier = modifier,
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val date = Instant.ofEpochMilli(datePickerState.selectedDateMillis ?: 0)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
+                    onDateSelected(date)
+                    onDismiss()
+                }) {
+                Text(stringResource(id = R.string.select))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(id = R.string.cancel))
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
+@Composable
+fun IdField(
+    modifier: Modifier = Modifier,
+    value: Int?,
+    onValueChange: (Int?) -> Unit,
+    isEnabled: Boolean = true,
+) {
+    Row(
+        modifier = modifier
+    ) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number
+            ),
+            value = value?.toString() ?: "",
+            onValueChange = { newValue ->
+                try {
+                    if (newValue.isNotBlank()) {
+                        onValueChange(newValue.toInt())
+                    } else onValueChange(null)
+                } catch (e: NumberFormatException) {
+                    //Prevent value from being updated
+                }
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Numbers,
+                    contentDescription = Icons.Filled.Numbers.name
+                )
+            },
+            label = {
+                Text(
+                    text = stringResource(id = R.string.filter_id)
+                )
+            },
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.filter_id_placeholder)
+                )
+            },
+            trailingIcon = {
+                value?.let {
+                    if (isEnabled) {
+                        IconButton(
+                            onClick = {
+                                onValueChange(null)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = Icons.Filled.Close.name
+                            )
+                        }
+                    }
+                }
+            },
+            enabled = isEnabled
+        )
     }
 }

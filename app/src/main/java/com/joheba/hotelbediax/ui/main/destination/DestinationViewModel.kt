@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -15,16 +16,17 @@ import javax.inject.Inject
 @HiltViewModel
 class DestinationViewModel @Inject constructor(
     private val useCase: DestinationUseCase,
-) : ViewModel(){
+) : ViewModel() {
 
     private val _state = MutableStateFlow(DestinationState())
     val state = _state.asStateFlow()
 
     init {
         getDestinations()
+        getPendingTempOperations()
     }
 
-    fun getDestinations() {
+    private fun getDestinations() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _state.value = _state.value.copy(
@@ -36,6 +38,29 @@ class DestinationViewModel @Inject constructor(
                 )
             }
 
+        }
+    }
+
+    private fun getPendingTempOperations() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                useCase.areOperationsPending().collect { amountOfOperations ->
+                    _state.value = _state.value.copy(
+                        pendingTempOperationsNumber = amountOfOperations
+                    )
+                }
+
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    pendingTempOperationsNumber = 0
+                )
+            }
+        }
+    }
+
+    fun forceSyncTempOperations() {
+        viewModelScope.launch(Dispatchers.IO) {
+            useCase.syncPendingOperations()
         }
     }
 

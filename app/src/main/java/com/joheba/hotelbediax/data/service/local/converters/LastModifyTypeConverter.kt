@@ -15,5 +15,5 @@ class LastModifyTypeConverter {
 
     @TypeConverter
     fun toLastModifyType(lastModify: String?): LocalDateTime? =
-        lastModify?.let{LocalDateTime.parse(it, formatter)}
+        lastModify?.let { LocalDateTime.parse(it, formatter) }
 }

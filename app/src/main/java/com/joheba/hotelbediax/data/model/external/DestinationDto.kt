@@ -5,7 +5,7 @@ import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.domain.core.DestinationType
 import java.time.LocalDateTime
 
-data class DestinationDto (
+data class DestinationDto(
     val id: Int,
     val name: String,
     val description: String,
@@ -13,9 +13,9 @@ data class DestinationDto (
     val countryCode: String,
     val type: DestinationType,
     @SerializedName("last_modify")
-    val lastModify: LocalDateTime
+    val lastModify: LocalDateTime,
 ) {
-    fun toEntity() : DestinationEntity =
+    fun toEntity(): DestinationEntity =
         DestinationEntity(
             id = id,
             name = name,

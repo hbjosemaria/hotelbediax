@@ -11,6 +11,6 @@ class DestinationTypeConverter {
 
     @TypeConverter
     fun toDestinationType(type: String?): DestinationType? =
-        type?.let{DestinationType.valueOf(it)}
+        type?.let { DestinationType.valueOf(it) }
 
 }

@@ -7,7 +7,6 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.joheba.hotelbediax.data.di.DataStoreVariableName
 import com.joheba.hotelbediax.data.di.DataStoreVariableType
-import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.data.model.local.DestinationRemoteKeyEntity
 import com.joheba.hotelbediax.data.repository.DataStoreRepository
@@ -22,7 +21,7 @@ class DestinationRemoteMediator @Inject constructor(
     private val database: HotelBediaXDatabase,
     private val externalDestinationRepository: ExternalDestinationRepository,
     private val dataStoreRepository: DataStoreRepository,
-    private val remoteKeyRepository: DestinationRemoteKeyRepository
+    private val remoteKeyRepository: DestinationRemoteKeyRepository,
 ) : RemoteMediator<Int, DestinationEntity>() {
 
     override suspend fun initialize(): InitializeAction {
@@ -31,10 +30,12 @@ class DestinationRemoteMediator @Inject constructor(
         // Feel free to adjust the cache timeout timer or set it to a specific daily time
         val cacheTimeoutAmount = TimeUnit.HOURS.toMillis(6)
         val currentTime = System.currentTimeMillis()
-        val lastCacheTimeout = dataStoreRepository.loadData<Long>(Pair(
-            DataStoreVariableType.LongType,
-            DataStoreVariableName.CACHE_TIMEOUT.variableName
-        ))
+        val lastCacheTimeout = dataStoreRepository.loadData<Long>(
+            Pair(
+                DataStoreVariableType.LongType,
+                DataStoreVariableName.CACHE_TIMEOUT.variableName
+            )
+        )
 
         //Use this line if you want to force a cache invalidation
 //        val lastCacheTimeout : Long? = null
@@ -48,6 +49,7 @@ class DestinationRemoteMediator @Inject constructor(
                 )
                 InitializeAction.LAUNCH_INITIAL_REFRESH
             }
+
             currentTime > lastCacheTimeout -> {
                 database.withTransaction {
                     dataStoreRepository.saveData(
@@ -58,6 +60,7 @@ class DestinationRemoteMediator @Inject constructor(
                 }
                 InitializeAction.LAUNCH_INITIAL_REFRESH
             }
+
             currentTime <= lastCacheTimeout -> InitializeAction.SKIP_INITIAL_REFRESH
             else -> InitializeAction.LAUNCH_INITIAL_REFRESH
         }
@@ -69,13 +72,14 @@ class DestinationRemoteMediator @Inject constructor(
     ): MediatorResult {
         val destinationDao = database.destinationDao()
 
-        val page = when(loadType) {
+        val page = when (loadType) {
             LoadType.REFRESH -> 1
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
             LoadType.APPEND -> {
                 val lastItem = state.lastItemOrNull()
-                lastItem?.let{
-                    remoteKeyRepository.getKey(lastItem.id)?.nextKey ?: return MediatorResult.Success(endOfPaginationReached = true)
+                lastItem?.let {
+                    remoteKeyRepository.getKey(lastItem.id)?.nextKey
+                        ?: return MediatorResult.Success(endOfPaginationReached = true)
                 } ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
         }
@@ -92,7 +96,7 @@ class DestinationRemoteMediator @Inject constructor(
 
         val destinationRemoteKeyList = destinationList.map { destinationEntity ->
             DestinationRemoteKeyEntity(
-                prevKey = if(page == 1) null else page - 1,
+                prevKey = if (page == 1) null else page - 1,
                 nextKey = if (page == result.totalPages) null else result.page + 1,
                 destinationId = destinationEntity.id
             )

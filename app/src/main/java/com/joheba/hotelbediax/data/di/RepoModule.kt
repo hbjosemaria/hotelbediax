@@ -30,45 +30,45 @@ object RepoModule {
     @Provides
     @Singleton
     fun provideLocalDestinationRepository(
-        roomService: DestinationDao
-    ) : LocalDestinationRepository =
+        roomService: DestinationDao,
+    ): LocalDestinationRepository =
         LocalDestinationRepositoryImpl(roomService)
 
     @Provides
     @Singleton
     fun provideDestinationTempRepository(
         apiService: ApiDestinationService,
-        roomService: LocalDestinationTempDao
-    ) : DestinationTempRepository =
+        roomService: LocalDestinationTempDao,
+    ): DestinationTempRepository =
         DestinationTempRepositoryImpl(roomService, apiService)
 
     @Provides
     @Singleton
     fun provideLocalDestinationTempRepository(
         apiService: ApiDestinationService,
-        roomService: LocalDestinationTempDao
-    ) : LocalDestinationTempRepository =
+        roomService: LocalDestinationTempDao,
+    ): LocalDestinationTempRepository =
         DestinationTempRepositoryImpl(roomService, apiService)
 
     @Provides
     @Singleton
     fun provideExternalDestinationRepository(
-        apiService: ApiDestinationService
-    ) : ExternalDestinationRepository =
+        apiService: ApiDestinationService,
+    ): ExternalDestinationRepository =
         ExternalDestinationRepositoryImpl(apiService)
 
     @Provides
     @Singleton
     fun provideDataStoreRepository(
-        dataStore: DataStore<Preferences>
-    ) : DataStoreRepository =
+        dataStore: DataStore<Preferences>,
+    ): DataStoreRepository =
         DataStoreRepositoryImpl(dataStore)
 
     @Provides
     @Singleton
     fun provideDestinationRemoteKeyRepository(
-        roomService: DestinationRemoteKeyDao
-    ) : DestinationRemoteKeyRepository =
+        roomService: DestinationRemoteKeyDao,
+    ): DestinationRemoteKeyRepository =
         DestinationRemoteKeyRepositoryImpl(roomService)
 
 }

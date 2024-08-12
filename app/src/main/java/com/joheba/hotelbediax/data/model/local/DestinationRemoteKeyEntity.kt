@@ -8,5 +8,5 @@ data class DestinationRemoteKeyEntity(
     val prevKey: Int?,
     val nextKey: Int?,
     @PrimaryKey
-    val destinationId: Int
+    val destinationId: Int,
 )

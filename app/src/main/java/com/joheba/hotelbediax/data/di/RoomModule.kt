@@ -2,7 +2,6 @@ package com.joheba.hotelbediax.data.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.joheba.hotelbediax.data.service.local.DestinationDao
 import com.joheba.hotelbediax.data.service.local.DestinationRemoteKeyDao
 import com.joheba.hotelbediax.data.service.local.HotelBediaXDatabase

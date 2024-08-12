@@ -33,6 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,11 +45,15 @@ import com.joheba.hotelbediax.ui.common.composables.LoadingIndicator
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.CountryCodeField
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.CountryCodeSelector
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.DescriptionField
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.IdField
+import com.joheba.hotelbediax.ui.common.composables.destinationfields.LastModifyField
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.NameField
 import com.joheba.hotelbediax.ui.common.composables.destinationfields.TypeField
 import com.joheba.hotelbediax.ui.common.composables.topbar.SingleScreenTopAppBar
 import com.joheba.hotelbediax.ui.theme.filterNotOkButton
 import com.joheba.hotelbediax.ui.theme.filterOkButton
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +69,8 @@ fun DestinationDetailsScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val state by destinationDetailsViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     var isCountryCodeSelectorOpened by rememberSaveable { mutableStateOf(false) }
     var areFieldsEditable by rememberSaveable { mutableStateOf(false) }
     var isDeletionConfirmationOpened by rememberSaveable { mutableStateOf(false) }
@@ -123,6 +131,7 @@ fun DestinationDetailsScreen(
 
                 is DestinationDetailsStateResult.Success -> {
                     val destination = result.destination
+                    val dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
 
                     val childModifier = Modifier
                         .fillMaxWidth()
@@ -143,6 +152,12 @@ fun DestinationDetailsScreen(
                                 modifier = Modifier
                                     .weight(1f)
                             ) {
+                                IdField(
+                                    modifier = childModifier,
+                                    value = state.id,
+                                    onValueChange = {},
+                                    isEnabled = false
+                                )
                                 NameField(
                                     modifier = childModifier,
                                     value = state.name,
@@ -171,9 +186,18 @@ fun DestinationDetailsScreen(
                                     },
                                     openCountryCodeSelector = {
                                         isCountryCodeSelectorOpened = true
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
                                     },
                                     isEnabled = areFieldsEditable
                                 )
+                                LastModifyField(
+                                    modifier = childModifier,
+                                    value = state.lastModify,
+                                    dateTimeFormatter = dateTimeFormatter,
+                                    onValueChange = {},
+                                    openLastModifyPicker = {},
+                                    isEnabled = false)
                                 TypeField(
                                     modifier = childModifier,
                                     value = state.type,
@@ -209,19 +233,6 @@ fun DestinationDetailsScreen(
                             }
                         }
 
-                        if (isCountryCodeSelectorOpened) {
-                            CountryCodeSelector(
-                                modifier = Modifier
-                                    .padding(paddingValues),
-                                onDismiss = {
-                                    isCountryCodeSelectorOpened = false
-                                },
-                                updateCountryCode = { newValue ->
-                                    destinationDetailsViewModel.updateCountryCode(newValue ?: "")
-                                }
-                            )
-                        }
-
                         if (isDeletionConfirmationOpened) {
                             DeleteConfirmationDialog(
                                 onDismiss = {
@@ -233,21 +244,18 @@ fun DestinationDetailsScreen(
                             )
                         }
                     }
-                }
-            }
 
-
-            if (isCountryCodeSelectorOpened) {
-                CountryCodeSelector(
-                    modifier = Modifier
-                        .padding(paddingValues),
-                    onDismiss = {
-                        isCountryCodeSelectorOpened = false
-                    },
-                    updateCountryCode = { newValue ->
-                        destinationDetailsViewModel.updateCountryCode(newValue ?: "")
+                    if (isCountryCodeSelectorOpened) {
+                        CountryCodeSelector(
+                            onDismiss = {
+                                isCountryCodeSelectorOpened = false
+                            },
+                            updateCountryCode = { newValue ->
+                                destinationDetailsViewModel.updateCountryCode(newValue ?: "")
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }

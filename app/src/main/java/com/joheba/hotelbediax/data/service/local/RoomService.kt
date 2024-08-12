@@ -3,28 +3,20 @@ package com.joheba.hotelbediax.data.service.local
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Database
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.RawQuery
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.Update
-import androidx.sqlite.db.SimpleSQLiteQuery
-import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.data.model.local.DestinationEntity
 import com.joheba.hotelbediax.data.model.local.DestinationRemoteKeyEntity
 import com.joheba.hotelbediax.data.model.local.DestinationTempEntity
-import com.joheba.hotelbediax.data.repository.DestinationRemoteKeyRepository
-import com.joheba.hotelbediax.data.repository.ExternalDestinationTempRepository
-import com.joheba.hotelbediax.data.repository.LocalDestinationTempRepository
-import com.joheba.hotelbediax.data.repository.LocalDestinationRepository
 import com.joheba.hotelbediax.data.service.local.converters.DestinationTempActionConverter
 import com.joheba.hotelbediax.data.service.local.converters.DestinationTypeConverter
 import com.joheba.hotelbediax.data.service.local.converters.LastModifyTypeConverter
 import com.joheba.hotelbediax.domain.core.DestinationType
-import java.time.LocalDateTime
+import kotlinx.coroutines.flow.Flow
 
 @Database(
     entities = [
@@ -47,19 +39,21 @@ abstract class HotelBediaXDatabase : RoomDatabase() {
 
 @Dao
 interface DestinationDao {
-    @Query("SELECT * FROM destination WHERE (:id IS NULL OR id = :id) " +
-            "AND (:name IS NULL OR name LIKE '%' || :name || '%') " +
-            "AND (:description IS NULL OR description LIKE '%' || :description || '%') " +
-            "AND (:type IS NULL OR type = :type) " +
-            "AND (:countryCode IS NULL OR countryCode = :countryCode) " +
-            "AND (:lastModify IS NULL OR lastModify = :lastModify) ORDER BY id DESC")
+    @Query(
+        "SELECT * FROM destination WHERE (:id IS NULL OR id = :id) " +
+                "AND (:name IS NULL OR name LIKE '%' || :name || '%') " +
+                "AND (:description IS NULL OR description LIKE '%' || :description || '%') " +
+                "AND (:type IS NULL OR type = :type) " +
+                "AND (:countryCode IS NULL OR countryCode = :countryCode) " +
+                "AND (:lastModify IS NULL OR lastModify like '%' || :lastModify || '%') ORDER BY id DESC"
+    )
     fun getAll(
         id: Int?,
         name: String?,
         description: String?,
         type: DestinationType?,
         countryCode: String?,
-        lastModify: LocalDateTime?
+        lastModify: String?,
     ): PagingSource<Int, DestinationEntity>
 
     @Query("SELECT * FROM destination WHERE id = :destinationId")
@@ -100,13 +94,28 @@ interface DestinationRemoteKeyDao {
 @Dao
 interface LocalDestinationTempDao {
 
-    @Query("SELECT * FROM destination_temp")
-    suspend fun getAll(): List<DestinationTempEntity>
+    @Query("select q1.* from destination_temp q1 where q1.`action` = 'CREATE' and q1.id not in (select q2.id from destination_temp q2 where q2.`action` = 'DELETE')")
+    suspend fun getCreationOperations(): List<DestinationTempEntity>
 
-    @Query("DELETE FROM destination_temp")
-    suspend fun clearAll()
+    @Query("select q1.* from destination_temp q1 where `action` = 'UPDATE' and q1.id not in (select q2.id from destination_temp q2 where q2.`action` = 'DELETE')")
+    suspend fun getUpdateOperations(): List<DestinationTempEntity>
 
-    @Insert
+    @Query("select q1.* from destination_temp q1 where q1.`action` = 'DELETE' and q1.id not in (select q2.id from destination_temp q2 where q2.`action` = 'CREATE')")
+    suspend fun getDeleteOperations(): List<DestinationTempEntity>
+
+    @Query("delete from destination_temp where `action` = 'CREATE'")
+    suspend fun clearCreationOperations()
+
+    @Query("delete from destination_temp where `action` = 'UPDATE'")
+    suspend fun clearUpdateOperations()
+
+    @Query("delete from destination_temp where `action` = 'DELETE'")
+    suspend fun clearDeleteOperations()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addEnqueuedRecord(destinationTemp: DestinationTempEntity)
+
+    @Query("select count(*) from destination_temp")
+    fun pendingTempOperationsNumber(): Flow<Int>
 
 }

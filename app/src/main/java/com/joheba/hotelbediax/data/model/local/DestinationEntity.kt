@@ -3,6 +3,7 @@ package com.joheba.hotelbediax.data.model.local
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.joheba.hotelbediax.data.model.external.DestinationDto
 import com.joheba.hotelbediax.domain.core.Destination
 import com.joheba.hotelbediax.domain.core.DestinationType
 import java.time.LocalDateTime
@@ -11,16 +12,16 @@ import java.time.LocalDateTime
     tableName = "destination",
     indices = [Index(value = ["id"])]
 )
-data class DestinationEntity (
+data class DestinationEntity(
     @PrimaryKey
     val id: Int,
     val name: String,
     val description: String,
     val countryCode: String,
     val type: DestinationType,
-    val lastModify: LocalDateTime
+    val lastModify: LocalDateTime,
 ) {
-    fun toDomain() : Destination =
+    fun toDomain(): Destination =
         Destination(
             id = id,
             name = name,
@@ -35,19 +36,29 @@ data class DestinationEntity (
     tableName = "destination_temp",
     primaryKeys = ["id", "action"]
 )
-data class DestinationTempEntity (
+data class DestinationTempEntity(
     val id: Int,
     val name: String,
     val description: String,
     val countryCode: String,
     val type: DestinationType,
     val lastModify: LocalDateTime,
-    val action: DestinationTempEntityAction
+    val action: DestinationTempEntityAction,
 ) {
     enum class DestinationTempEntityAction {
         CREATE,
         UPDATE,
         DELETE
     }
+
+    fun toDto(): DestinationDto =
+        DestinationDto(
+            id = id,
+            name = name,
+            description = description,
+            type = type,
+            countryCode = countryCode,
+            lastModify = lastModify
+        )
 }
 

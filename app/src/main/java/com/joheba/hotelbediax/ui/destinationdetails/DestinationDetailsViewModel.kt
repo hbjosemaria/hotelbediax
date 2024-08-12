@@ -44,10 +44,12 @@ class DestinationDetailsViewModel @AssistedInject constructor(
                         result = DestinationDetailsStateResult.Success(
                             destination = destination
                         ),
+                        id = destination.id,
                         name = destination.name,
                         description = destination.description,
                         type = destination.type,
-                        countryCode = destination.countryCode
+                        countryCode = destination.countryCode,
+                        lastModify = destination.lastModify
                     )
                 } catch (e: Exception) {
                     _state.value = _state.value.copy(

@@ -14,7 +14,7 @@ data class Destination(
     val description: String = "",
     val countryCode: String = "",
     val type: DestinationType = DestinationType.COUNTRY,
-    val lastModify: LocalDateTime = LocalDateTime.now()
+    val lastModify: LocalDateTime = LocalDateTime.now(),
 ) {
     fun toEntity(): DestinationEntity =
         DestinationEntity(
@@ -38,7 +38,7 @@ data class Destination(
         )
 
     fun toDto(): DestinationDto =
-        DestinationDto (
+        DestinationDto(
             id = id,
             name = name,
             description = description,
